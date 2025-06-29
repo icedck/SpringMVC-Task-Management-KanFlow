@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Kanflow - All Boards</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; padding: 20px; background-color: #f4f5f7; }
+    h1 { color: #172B4D; }
+    table { border-collapse: collapse; width: 60%; margin-top: 20px; background-color: white; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+    th, td { border-bottom: 1px solid #ddd; text-align: left; padding: 12px 15px; }
+    th { background-color: #fafbfc; font-weight: 600; color: #5e6c84; }
+    a { text-decoration: none; color: #0052cc; font-weight: 500; }
+    a:hover { text-decoration: underline; }
+    .create-button {
+      display: inline-block;
+      padding: 10px 15px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      color: #fff;
+      background-color: #5aac44;
+      border: none;
+      border-radius: 3px;
+    }
+    .create-button:hover { background-color: #61bd4f; }
+  </style>
+</head>
+<body>
+<h1>All Boards</h1>
+<a th:href="@{/boards/create}" class="create-button">Create New Board</a>
+
+<div th:if="${boards.isEmpty()}" style="margin-top: 20px;">
+  <p>No boards found. Let's create one!</p>
+</div>
+
+<table th:unless="${boards.isEmpty()}">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Board Title</th>
+    <th>Owner ID</th>
+  </tr>
+  </thead>
+  <tbody>
+  <!-- Dùng th:each để lặp qua danh sách 'boards' từ controller -->
+  <tr th:each="board : ${boards}">
+    <td th:text="${board.id}">1</td>
+    <td>
+      <!-- th:href tạo link động đến trang chi tiết -->
+      <a th:href="@{/boards/{id}(id=${board.id})}" th:text="${board.title}">Project Kanflow</a>
+    </td>
+    <td th:text="${board.owner != null} ? ${board.owner.id} : 'N/A'">1</td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>
