@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${board.title} + ' | Kanflow'"></title>
-    <!-- 1. Thêm jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <style>
-        /* (Giữ nguyên style cũ hoặc copy style từ lần hướng dẫn trước) */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: #0079BF;
@@ -39,12 +37,20 @@
             margin: 10px;
             padding: 10px;
             min-width: 272px;
+            max-width: 272px;
             color: #172B4D;
+            display: flex;
+            flex-direction: column;
         }
 
         .card-list-header {
             font-weight: bold;
             padding: 5px;
+        }
+
+        .card-container {
+            flex-grow: 1;
+            min-height: 20px;
         }
 
         .card {
@@ -53,6 +59,13 @@
             padding: 10px;
             margin-bottom: 8px;
             box-shadow: 0 1px 0 rgba(9, 30, 66, .25);
+            cursor: pointer;
+        }
+
+        /* Style cho form Add List */
+        .add-list-wrapper {
+            min-width: 272px;
+            margin: 10px;
         }
 
         .add-list-form {
@@ -78,6 +91,78 @@
             border-radius: 3px;
             cursor: pointer;
         }
+
+        /* Style cho form Add Card */
+        .add-card-form-container {
+            margin-top: 10px;
+        }
+
+        .add-card-form input {
+            width: 100%;
+            border: none;
+            padding: 8px;
+            border-radius: 3px;
+            box-sizing: border-box;
+            margin-bottom: 5px;
+        }
+
+        .add-card-form button {
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        /* CSS for Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #f4f5f7;
+            padding: 20px;
+            border-radius: 3px;
+            width: 600px;
+            max-width: 90%;
+            position: relative;
+            color: #172B4D;
+        }
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+        #modal-card-content h2 { margin-top: 0; }
+        #modal-card-description {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 8px;
+            font-family: inherit;
+        }
+        #save-card-details {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background-color: #5aac44;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -86,16 +171,32 @@
 </div>
 
 <div class="board-container" id="board-container">
-    <!-- Lặp qua các list đã có để hiển thị khi tải trang -->
+    <!-- ============================================== -->
+    <!--        VÒNG LẶP ĐÚNG ĐỂ HIỂN THỊ LIST        -->
+    <!-- ============================================== -->
     <div class="card-list" th:each="list : ${board.cardLists}" th:attr="data-list-id=${list.id}">
         <div class="card-list-header">
             <h3 th:text="${list.title}">List Title</h3>
         </div>
-        <!-- (Khu vực chứa card sẽ được thêm sau) -->
+        <!-- VÙNG CHỨA CÁC CARD -->
+        <div class="card-container">
+            <div class="card" th:each="card : ${list.cards}" th:attr="data-card-id=${card.id}">
+                <span th:text="${card.title}">Card Title</span>
+            </div>
+        </div>
+        <!-- FORM TẠO CARD MỚI -->
+        <div class="add-card-form-container">
+            <form class="add-card-form">
+                <input type="text" class="new-card-title" placeholder="Enter a title for this card..." required/>
+                <button type="submit">Add Card</button>
+            </form>
+        </div>
     </div>
 
-    <!-- 2. FORM TẠO LIST MỚI (đã thay đổi) -->
-    <div class="card-list">
+    <!-- ============================================== -->
+    <!--         FORM TẠO LIST MỚI (ĐÃ KHÔI PHỤC)     -->
+    <!-- ============================================== -->
+    <div class="add-list-wrapper">
         <form id="add-list-form" class="add-list-form">
             <input type="text" id="new-list-title" placeholder="Enter list title..." required/>
             <button type="submit">Add List</button>
@@ -103,68 +204,141 @@
     </div>
 </div>
 
-<!-- 3. Thêm khối script cho AJAX -->
+<!-- ... thẻ đóng của div#board-container ... -->
+
+<!-- ============================================== -->
+<!--         MODAL CHI TIẾT CARD (BỊ ẨN)         -->
+<!-- ============================================== -->
+<div id="card-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <button class="close-modal">×</button>
+        <div id="modal-card-content">
+            <!-- Nội dung chi tiết của card sẽ được đổ vào đây bằng AJAX -->
+            <h2 id="modal-card-title"></h2>
+            <p><strong>Description</strong></p>
+            <textarea id="modal-card-description" rows="4"></textarea>
+            <button id="save-card-details">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- KHỐI SCRIPT GIỮ NGUYÊN NHƯ CŨ -->
 <script th:inline="javascript">
-    // Sử dụng th:inline="javascript" để có thể nhúng biến từ Spring Model vào JS
     const boardId = /*[[${board.id}]]*/ 'default';
 
-    // Hàm này dùng để tạo ra chuỗi HTML cho một list mới
+    /* ====================================
+     *      LOGIC FOR CARD LISTS
+     * ==================================== */
     function createListHtml(listDto) {
         return `
-            <div class="card-list" data-list-id="${listDto.id}">
-                <div class="card-list-header">
-                    <h3>${listDto.title}</h3>
+                <div class="card-list" data-list-id="${listDto.id}">
+                    <div class="card-list-header">
+                        <h3>${listDto.title}</h3>
+                    </div>
+                    <div class="card-container"></div>
+                    <div class="add-card-form-container">
+                        <form class="add-card-form">
+                            <input type="text" class="new-card-title" placeholder="Enter a title for this card..." required />
+                            <button type="submit">Add Card</button>
+                        </form>
+                    </div>
                 </div>
-                <!-- Card container trống cho list mới -->
-                <div class="card-container"></div>
-            </div>
-        `;
+            `;
     }
 
-    // Bắt sự kiện submit của form có id là 'add-list-form'
     $('#add-list-form').on('submit', function (event) {
-        event.preventDefault(); // Ngăn form tải lại trang
-
+        event.preventDefault();
         let listTitle = $('#new-list-title').val().trim();
-        if (!listTitle) {
-            alert('List title cannot be empty.');
-            return;
-        }
+        if (!listTitle) return;
 
-        let newListDto = {
-            title: listTitle
-        };
+        let newListDto = {title: listTitle};
 
-        // Gửi yêu cầu AJAX đến API
         $.ajax({
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
+            headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
             type: 'POST',
             url: `/api/lists?boardId=${boardId}`,
             data: JSON.stringify(newListDto),
             success: function (responseDto) {
-                // Khi API trả về thành công (mã 201)
-                console.log('List created successfully:', responseDto);
-
-                // Dùng hàm createListHtml để tạo phần tử HTML mới
                 let newListElement = createListHtml(responseDto);
-
-                // Chèn list mới vào DOM, ngay trước phần tử cha của form (là div.card-list)
-                $('#add-list-form').parent().before(newListElement);
-
-                // Xóa trống input để người dùng có thể nhập tiếp
+                // Chèn list mới vào trước cái div bọc form add-list
+                $('.add-list-wrapper').before(newListElement);
                 $('#new-list-title').val('');
             },
             error: function (error) {
-                // Khi API trả về lỗi
                 console.error('Error creating list:', error);
-                alert('An error occurred while creating the list. Please check the console.');
+                alert('An error occurred while creating the list.');
             }
         });
     });
-</script>
 
+    /* ====================================
+     *      LOGIC FOR CARDS
+     * ==================================== */
+    function createCardHtml(cardDto) {
+        return `<div class="card" data-card-id="${cardDto.id}"><span>${cardDto.title}</span></div>`;
+    }
+
+    $(document).on('submit', '.add-card-form', function (event) {
+        event.preventDefault();
+        let form = $(this);
+        let cardTitleInput = form.find('.new-card-title');
+        let cardTitle = cardTitleInput.val().trim();
+        if (!cardTitle) return;
+
+        let listId = form.closest('.card-list').data('list-id');
+        let newCardDto = {title: cardTitle};
+
+        $.ajax({
+            headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+            type: 'POST',
+            url: `/api/cards?listId=${listId}`,
+            data: JSON.stringify(newCardDto),
+            success: function (responseDto) {
+                let newCardElement = createCardHtml(responseDto);
+                form.closest('.card-list').find('.card-container').append(newCardElement);
+                cardTitleInput.val('');
+            },
+            error: function (error) {
+                console.error('Error creating card:', error);
+                alert('An error occurred while creating the card.');
+            }
+        });
+    });
+
+    // Bắt sự kiện click vào một card
+    $(document).on('click', '.card', function() {
+        let card = $(this);
+        let cardId = card.data('card-id');
+        $('#card-modal').data('current-card-id', cardId); // Lưu cardId vào modal để dùng sau
+
+        // Gọi AJAX để lấy chi tiết card
+        $.ajax({
+            type: 'GET',
+            url: `/api/cards/${cardId}`,
+            success: function(cardDto) {
+                // Đổ dữ liệu vào modal
+                $('#modal-card-title').text(cardDto.title);
+                $('#modal-card-description').val(cardDto.description);
+                // Hiển thị modal
+                $('#card-modal').show();
+            },
+            error: function() {
+                alert('Could not fetch card details.');
+            }
+        });
+    });
+
+    // Bắt sự kiện click nút đóng modal
+    $('.close-modal').on('click', function() {
+        $('#card-modal').hide();
+    });
+
+    // Bắt sự kiện click ra ngoài vùng modal để đóng
+    $('#card-modal').on('click', function(event) {
+        if (event.target === this) {
+            $(this).hide();
+        }
+    });
+</script>
 </body>
 </html>

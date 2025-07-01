@@ -16,4 +16,9 @@ public class CardListService implements ICardListService { // Triển khai inter
     public CardList save(CardList cardList) {
         return cardListRepository.save(cardList);
     }
+
+    @Override
+    public CardList findById(Long id) {
+        return cardListRepository.findById(id).orElse(null);
+    }
 }
