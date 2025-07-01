@@ -50,15 +50,17 @@ public class BoardController {
         return "redirect:/boards";
     }
 
-    // Hiển thị trang chi tiết một board
     @GetMapping("/{id}")
     public ModelAndView showBoardDetails(@PathVariable Long id) {
-        Board board = boardService.findById(id);
+        // Thay đổi lời gọi ở đây
+        Board board = boardService.findByIdWithDetails(id);
+
         if (board != null) {
             ModelAndView modelAndView = new ModelAndView("board/detail");
             modelAndView.addObject("board", board);
             return modelAndView;
         } else {
+            // Có thể tạo một file error/404.html đơn giản
             return new ModelAndView("error/404");
         }
     }

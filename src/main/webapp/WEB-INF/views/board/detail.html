@@ -7,16 +7,77 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <style>
         /* (Giữ nguyên style cũ hoặc copy style từ lần hướng dẫn trước) */
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #0079BF; color: white; margin: 0; }
-        .board-header { padding: 8px 20px; background-color: rgba(0,0,0,0.15); }
-        .board-header h1 { font-size: 20px; margin: 5px 0; }
-        .board-container { display: flex; flex-direction: row; align-items: flex-start; padding: 10px; overflow-x: auto; height: calc(100vh - 100px); }
-        .card-list { background-color: #EBECF0; border-radius: 3px; margin: 10px; padding: 10px; min-width: 272px; color: #172B4D; }
-        .card-list-header { font-weight: bold; padding: 5px; }
-        .card { background-color: white; border-radius: 3px; padding: 10px; margin-bottom: 8px; box-shadow: 0 1px 0 rgba(9,30,66,.25); }
-        .add-list-form { background-color: rgba(255,255,255,0.2); padding: 10px; border-radius: 3px; }
-        .add-list-form input { width: 100%; border: none; padding: 8px; border-radius: 3px; box-sizing: border-box; }
-        .add-list-form button { margin-top: 5px; padding: 8px 12px; background-color: #5aac44; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #0079BF;
+            color: white;
+            margin: 0;
+        }
+
+        .board-header {
+            padding: 8px 20px;
+            background-color: rgba(0, 0, 0, 0.15);
+        }
+
+        .board-header h1 {
+            font-size: 20px;
+            margin: 5px 0;
+        }
+
+        .board-container {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            padding: 10px;
+            overflow-x: auto;
+            height: calc(100vh - 100px);
+        }
+
+        .card-list {
+            background-color: #EBECF0;
+            border-radius: 3px;
+            margin: 10px;
+            padding: 10px;
+            min-width: 272px;
+            color: #172B4D;
+        }
+
+        .card-list-header {
+            font-weight: bold;
+            padding: 5px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 3px;
+            padding: 10px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 0 rgba(9, 30, 66, .25);
+        }
+
+        .add-list-form {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 3px;
+        }
+
+        .add-list-form input {
+            width: 100%;
+            border: none;
+            padding: 8px;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+
+        .add-list-form button {
+            margin-top: 5px;
+            padding: 8px 12px;
+            background-color: #5aac44;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -36,7 +97,7 @@
     <!-- 2. FORM TẠO LIST MỚI (đã thay đổi) -->
     <div class="card-list">
         <form id="add-list-form" class="add-list-form">
-            <input type="text" id="new-list-title" placeholder="Enter list title..." required />
+            <input type="text" id="new-list-title" placeholder="Enter list title..." required/>
             <button type="submit">Add List</button>
         </form>
     </div>
@@ -61,7 +122,7 @@
     }
 
     // Bắt sự kiện submit của form có id là 'add-list-form'
-    $('#add-list-form').on('submit', function(event) {
+    $('#add-list-form').on('submit', function (event) {
         event.preventDefault(); // Ngăn form tải lại trang
 
         let listTitle = $('#new-list-title').val().trim();
@@ -83,7 +144,7 @@
             type: 'POST',
             url: `/api/lists?boardId=${boardId}`,
             data: JSON.stringify(newListDto),
-            success: function(responseDto) {
+            success: function (responseDto) {
                 // Khi API trả về thành công (mã 201)
                 console.log('List created successfully:', responseDto);
 
@@ -96,7 +157,7 @@
                 // Xóa trống input để người dùng có thể nhập tiếp
                 $('#new-list-title').val('');
             },
-            error: function(error) {
+            error: function (error) {
                 // Khi API trả về lỗi
                 console.error('Error creating list:', error);
                 alert('An error occurred while creating the list. Please check the console.');

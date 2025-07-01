@@ -28,4 +28,10 @@ public class BoardService implements IBoardService { // Thêm "implements IBoard
     public Board findById(Long id) {
         return boardRepository.findById(id).orElse(null);
     }
+
+    @Override
+    public Board findByIdWithDetails(Long id) {
+        // Gọi phương thức mới trong repository
+        return boardRepository.findByIdWithDetails(id).orElse(null);
+    }
 }
