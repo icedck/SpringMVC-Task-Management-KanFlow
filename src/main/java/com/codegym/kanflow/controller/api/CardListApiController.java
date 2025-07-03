@@ -39,4 +39,30 @@ public class CardListApiController {
 
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CardListDto> updateListTitle(@PathVariable Long id, @RequestBody CardListDto cardListDto) {
+        CardList listToSave = cardListService.findById(id);
+        if (listToSave == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        listToSave.setTitle(cardListDto.getTitle());
+        CardList savedList = cardListService.save(listToSave);
+
+        CardListDto responseDto = new CardListDto(savedList.getId(), savedList.getTitle(), savedList.getPosition());
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<CardListDto> deleteList(@PathVariable Long id) {
+        CardList listToDelete = cardListService.findById(id);
+        if (listToDelete == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        cardListService.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

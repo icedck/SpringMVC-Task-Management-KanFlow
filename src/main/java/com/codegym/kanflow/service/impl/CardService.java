@@ -20,4 +20,9 @@ public class CardService implements ICardService {
     public Card findById(Long id) {
         return cardRepository.findById(id).orElse(null);
     }
+
+    @Override
+    public void deleteById(Long id) {
+        cardRepository.deleteById(id);
+    }
 }

@@ -16,4 +16,6 @@ public interface ICardListService {
      * @return Đối tượng CardList nếu tìm thấy, ngược lại trả về null.
      */
     CardList findById(Long id); // <-- THÊM DÒNG NÀY
+
+    void deleteById(Long id);
 }

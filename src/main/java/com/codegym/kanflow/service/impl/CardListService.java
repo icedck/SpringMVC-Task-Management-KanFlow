@@ -21,4 +21,9 @@ public class CardListService implements ICardListService { // Triển khai inter
     public CardList findById(Long id) {
         return cardListRepository.findById(id).orElse(null);
     }
+
+    @Override
+    public void deleteById(Long id) {
+        cardListRepository.deleteById(id);
+    }
 }

@@ -6,4 +6,6 @@ public interface ICardService {
     Card save(Card card);
 
     Card findById(Long id);
+
+    void deleteById(Long id);
 }

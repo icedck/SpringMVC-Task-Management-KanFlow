@@ -58,4 +58,29 @@ public class CardApiController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<CardDto> updateCard(@PathVariable Long id, @RequestBody CardDto cardDto) {
+        Card card = cardService.findById(id);
+        if (card == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        card.setTitle(cardDto.getTitle());
+        card.setDescription(cardDto.getDescription());
+
+        Card updatedCard = cardService.save(card);
+
+        CardDto responseDto = new CardDto(card.getId(), card.getTitle(), card.getDescription(), card.getPosition());
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<CardDto> deleteCard(@PathVariable Long id) {
+        Card card = cardService.findById(id);
+        if (card == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        cardService.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
