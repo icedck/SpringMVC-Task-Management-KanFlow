@@ -17,6 +17,6 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
      * @param id ID của Board cần tìm.
      * @return một Optional chứa Board với đầy đủ dữ liệu.
      */
-    @Query("SELECT b FROM Board b LEFT JOIN FETCH b.cardLists cl LEFT JOIN FETCH cl.cards WHERE b.id = :id")
+    @Query("SELECT b FROM Board b LEFT JOIN FETCH b.cardLists cl WHERE b.id = :id")
     Optional<Board> findByIdWithDetails(@Param("id") Long id);
 }

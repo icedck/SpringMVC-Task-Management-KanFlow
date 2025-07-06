@@ -1,7 +1,7 @@
 package com.codegym.kanflow.model;
 
 import javax.persistence.*;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "boards")
@@ -19,7 +19,8 @@ public class Board {
 
     // Quan hệ 1-Nhiều: Một Board có thể chứa nhiều CardList.
     @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
-    private Set<CardList> cardLists;
+    @OrderBy("position ASC")
+    private List<CardList> cardLists;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -28,6 +29,6 @@ public class Board {
     public void setTitle(String title) { this.title = title; }
     public User getOwner() { return owner; }
     public void setOwner(User owner) { this.owner = owner; }
-    public Set<CardList> getCardLists() { return cardLists; }
-    public void setCardLists(Set<CardList> cardLists) { this.cardLists = cardLists; }
+    public List<CardList> getCardLists() { return cardLists; }
+    public void setCardLists(List<CardList> cardLists) { this.cardLists = cardLists; }
 }

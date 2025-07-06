@@ -2,6 +2,8 @@ package com.codegym.kanflow.service;
 
 import com.codegym.kanflow.model.CardList;
 
+import java.util.List;
+
 public interface ICardListService {
     /**
      * Lưu một đối tượng CardList mới hoặc cập nhật một đối tượng đã có.
@@ -18,4 +20,6 @@ public interface ICardListService {
     CardList findById(Long id); // <-- THÊM DÒNG NÀY
 
     void deleteById(Long id);
+
+    void updatePositions(List<Long> listIds);
 }

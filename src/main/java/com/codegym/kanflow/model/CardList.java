@@ -1,7 +1,7 @@
 package com.codegym.kanflow.model;
 
 import javax.persistence.*;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "card_lists")
@@ -18,7 +18,8 @@ public class CardList {
     private Board board;
 
     @OneToMany(mappedBy = "cardList", fetch = FetchType.LAZY)
-    private Set<Card> cards;
+    @OrderBy("position ASC")
+    private List<Card> cards;
 
     // Getters and Setters...
     public Long getId() { return id; }
@@ -29,6 +30,6 @@ public class CardList {
     public void setPosition(int position) { this.position = position; }
     public Board getBoard() { return board; }
     public void setBoard(Board board) { this.board = board; }
-    public Set<Card> getCards() { return cards; }
-    public void setCards(Set<Card> cards) { this.cards = cards; }
+    public List<Card> getCards() { return cards; }
+    public void setCards(List<Card> cards) { this.cards = cards; }
 }

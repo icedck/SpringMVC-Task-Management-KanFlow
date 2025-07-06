@@ -1,6 +1,7 @@
 package com.codegym.kanflow.model;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -17,7 +18,7 @@ public class User {
     // Quan hệ 1-Nhiều: Một User có thể sở hữu nhiều Board.
     // 'mappedBy = "owner"' chỉ ra rằng mối quan hệ này được quản lý bởi trường 'owner' trong lớp Board.
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
-    private Set<Board> boards;
+    private List<Board> boards;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -28,6 +29,6 @@ public class User {
     public void setPassword(String password) { this.password = password; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-    public Set<Board> getBoards() { return boards; }
-    public void setBoards(Set<Board> boards) { this.boards = boards; }
+    public List<Board> getBoards() { return boards; }
+    public void setBoards(List<Board> boards) { this.boards = boards; }
 }

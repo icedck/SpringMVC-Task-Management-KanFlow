@@ -1,6 +1,7 @@
 package com.codegym.kanflow.controller.api;
 
 import com.codegym.kanflow.dto.CardDto;
+import com.codegym.kanflow.dto.CardMoveDto;
 import com.codegym.kanflow.model.Card;
 import com.codegym.kanflow.model.CardList;
 import com.codegym.kanflow.service.ICardListService;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 // Thêm service findById cho CardList
 // 1. Vào ICardListService thêm CardList findById(Long id);
@@ -82,5 +85,21 @@ public class CardApiController {
         }
         cardService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/updatePositions")
+    public ResponseEntity<Void> updateCardPositions(@RequestBody List<Long> cardIds) {
+        cardService.updatePositions(cardIds);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/{cardId}/move")
+    public ResponseEntity<Void> moveCard(@PathVariable Long cardId, @RequestBody CardMoveDto cardMoveDto) {
+        try {
+            cardService.move(cardId, cardMoveDto.getTargetListId(), cardMoveDto.getNewPosition());
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 }

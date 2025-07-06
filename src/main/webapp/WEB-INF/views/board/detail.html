@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title th:text="${board.title} + ' | Kanflow'"></title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -200,6 +202,22 @@
         }
         .card-list:hover .list-delete-btn { display: block; } /* Hiện nút khi di chuột qua list */
         .list-delete-btn:hover { background-color: #dfe1e6; }
+        .sortable-placeholder {
+            background-color: #dfe1e6;
+            border: 2px dashed #ccc;
+            height: 40px; /* Tùy chỉnh chiều cao */
+            margin-bottom: 8px;
+            border-radius: 3px;
+        }
+
+        .list-placeholder {
+            background-color: rgba(0,0,0,0.2);
+            border: 2px dashed #a0a0a0;
+            border-radius: 3px;
+            margin: 10px;
+            min-width: 272px;
+            height: 100px; /* Tùy chỉnh chiều cao */
+        }
     </style>
 </head>
 <body>
@@ -536,6 +554,81 @@
             },
             error: function() {
                 alert('Could not delete the list.');
+            }
+        });
+    });
+
+    /* ====================================
+ *      LOGIC FOR DRAG & DROP (PHIÊN BẢN TỐI ƯU)
+ * ==================================== */
+    $(function() {
+        // Hàm helper duy nhất chúng ta cần: gọi API move
+        function moveCardApi(cardId, targetListId, newPosition) {
+            $.ajax({
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                type: 'PUT',
+                url: `/api/cards/${cardId}/move`,
+                data: JSON.stringify({
+                    targetListId: targetListId,
+                    newPosition: newPosition
+                }),
+                success: function() {
+                    console.log(`Card ${cardId} moved to list ${targetListId} at position ${newPosition}`);
+                },
+                error: function() {
+                    alert('Failed to move the card. The board might be out of sync. Please refresh.');
+                    // Trong trường hợp lỗi, tốt nhất là thông báo người dùng tải lại trang
+                    // để tránh các hành động sai trên giao diện không đồng bộ với CSDL.
+                }
+            });
+        }
+
+        // Kích hoạt Sortable trên tất cả các .card-container
+        $(".card-container").sortable({
+            items: ".card",
+            placeholder: "sortable-placeholder",
+            cursor: "move",
+            connectWith: ".card-container",
+
+            // Sự kiện 'stop' được gọi khi người dùng thả chuột, bất kể là trong list cũ hay mới.
+            // Nó đơn giản và hiệu quả hơn việc dùng cả 'update' và 'receive'.
+            stop: function(event, ui) {
+                // Lấy thông tin cần thiết từ card vừa được thả
+                let cardId = ui.item.data('card-id');
+                let targetListId = ui.item.closest('.card-list').data('list-id');
+                let newPosition = ui.item.index();
+
+                // Gọi API để backend xử lý toàn bộ logic
+                moveCardApi(cardId, targetListId, newPosition);
+            }
+        }).disableSelection();
+
+        // KÍCH HOẠT SORTABLE CHO VÙNG CHỨA CÁC LIST (MỚI)
+        $("#board-container").sortable({
+            items: ".card-list", // Chỉ kéo-thả được các phần tử .card-list
+            placeholder: "list-placeholder", // Class cho vị trí giữ chỗ
+            cursor: "move",
+
+            // Sự kiện update được gọi khi việc sắp xếp các list hoàn tất
+            update: function(event, ui) {
+                let listOrder = $(this).sortable('toArray', { attribute: 'data-list-id' })
+                    .map(id => parseInt(id, 10));
+
+                console.log("New list order: ", listOrder);
+
+                // Gọi API để cập nhật vị trí các list
+                $.ajax({
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    type: 'PUT',
+                    url: '/api/lists/updatePositions',
+                    data: JSON.stringify(listOrder),
+                    success: function() {
+                        console.log('List positions updated successfully.');
+                    },
+                    error: function() {
+                        alert('Failed to save the new list order.');
+                    }
+                });
             }
         });
     });

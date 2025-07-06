@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/lists")
 public class CardListApiController {
@@ -64,5 +66,11 @@ public class CardListApiController {
 
         cardListService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/updatePositions")
+    public ResponseEntity<Void> updateListPositions(@RequestBody List<Long> listIds) {
+        cardListService.updatePositions(listIds);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

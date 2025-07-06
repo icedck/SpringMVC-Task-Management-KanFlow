@@ -6,6 +6,9 @@ import com.codegym.kanflow.service.ICardListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
+import java.util.List;
+
 @Service // Đánh dấu đây là một Spring Bean thuộc tầng Service
 public class CardListService implements ICardListService { // Triển khai interface
 
@@ -25,5 +28,22 @@ public class CardListService implements ICardListService { // Triển khai inter
     @Override
     public void deleteById(Long id) {
         cardListRepository.deleteById(id);
+    }
+
+    @Override
+    public void updatePositions(List<Long> listIds) {
+        for (int i = 0; i < listIds.size(); i++) {
+            Long listId = listIds.get(i);
+            int newPosition = i;
+
+            // Dùng orElseThrow để xử lý trường hợp không tìm thấy list
+            CardList list = cardListRepository.findById(listId)
+                    .orElseThrow(() -> new EntityNotFoundException("CardList not found with id: " + listId));
+
+            list.setPosition(newPosition);
+
+            // **SỬA LỖI:** Thêm lời gọi save() tường minh
+            cardListRepository.save(list);
+        }
     }
 }

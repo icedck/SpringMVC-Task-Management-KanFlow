@@ -1,11 +1,12 @@
 package com.codegym.kanflow.config;
 
+import com.codegym.kanflow.security.WebSecurityConfig;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
     @Override
     protected Class<?>[] getRootConfigClasses() {
-        return new Class[]{AppConfig.class};
+        return new Class[]{AppConfig.class, WebSecurityConfig.class};
     }
 
     @Override
