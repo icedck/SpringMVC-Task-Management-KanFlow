@@ -37,6 +37,10 @@
             You have been logged out successfully.
         </div>
 
+        <div th:if="${param.register_success}" class="alert alert-success" role="alert">
+            Registration successful! Please log in.
+        </div>
+
         <!-- Form đăng nhập sử dụng các class của Bootstrap -->
         <form th:action="@{/doLogin}" method="post">
             <div class="form-floating mb-3">
@@ -53,8 +57,7 @@
 
         <div class="text-center mt-4">
             <!-- Sẽ thêm link đăng ký ở đây sau -->
-            <p class="text-muted">Don't have an account? <a href="/register">Sign up</a></p>
-        </div>
+            <p class="text-muted">Don't have an account? <a th:href="@{/register}">Sign up</a></p>        </div>
     </div>
 </div>
 

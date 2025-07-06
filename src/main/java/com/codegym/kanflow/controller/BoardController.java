@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -19,9 +21,15 @@ public class BoardController {
 
     // Hiển thị danh sách tất cả board
     @GetMapping
-    public ModelAndView showBoardList() {
+    public ModelAndView showBoardList(Principal principal) { // Nhận Principal
         ModelAndView modelAndView = new ModelAndView("board/list");
-        List<Board> boards = boardService.findAll();
+
+        // Tìm người dùng hiện tại
+        User currentUser = userService.findByUsername(principal.getName());
+
+        // Lấy danh sách các board chỉ thuộc về người dùng này
+        List<Board> boards = boardService.findAllByOwner(currentUser);
+
         modelAndView.addObject("boards", boards);
         return modelAndView;
     }
@@ -34,18 +42,17 @@ public class BoardController {
         return modelAndView;
     }
 
-    // Xử lý việc tạo board
     @PostMapping("/create")
-    public String createBoard(@ModelAttribute("board") Board board) {
-        // Tạm thời gán board cho user có id = 1
-        // Sẽ thay đổi khi có chức năng đăng nhập
-        User currentUser = userService.findById(1L);
-        if (currentUser == null) {
-            // Xử lý trường hợp không có user id=1 (ví dụ: quay về trang lỗi)
-            // Tạm thời, để đơn giản, chúng ta bỏ qua. Cần đảm bảo có user id=1 trong CSDL.
-            return "redirect:/error";
-        }
+    // Sửa lại chữ ký phương thức để nhận Principal
+    public String createBoard(@ModelAttribute("board") Board board, Principal principal) {
+        // Lấy username của người dùng đang đăng nhập
+        String username = principal.getName();
+        // Tìm đối tượng User tương ứng trong CSDL
+        User currentUser = userService.findByUsername(username);
+
+        // Gán owner cho board
         board.setOwner(currentUser);
+
         boardService.save(board);
         return "redirect:/boards";
     }

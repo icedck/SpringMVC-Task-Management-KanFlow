@@ -1,6 +1,7 @@
 package com.codegym.kanflow.service.impl;
 
 import com.codegym.kanflow.model.Board;
+import com.codegym.kanflow.model.User;
 import com.codegym.kanflow.repository.BoardRepository;
 import com.codegym.kanflow.service.IBoardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,5 +47,10 @@ public class BoardService implements IBoardService { // Thêm "implements IBoard
         }
 
         return board;
+    }
+
+    @Override
+    public List<Board> findAllByOwner(User owner) {
+        return boardRepository.findAllByOwner(owner);
     }
 }

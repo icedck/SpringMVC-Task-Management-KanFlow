@@ -18,7 +18,7 @@ import java.util.Properties;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories("com.codegym.kanflow.repository")
-@ComponentScan(basePackages = {"com.codegym.kanflow.service", "com.codegym.kanflow.security"})
+@ComponentScan(basePackages = "com.codegym.kanflow")
 public class AppConfig {
 
     @Bean

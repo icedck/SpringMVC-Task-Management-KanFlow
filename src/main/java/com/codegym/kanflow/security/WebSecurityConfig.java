@@ -1,9 +1,13 @@
 package com.codegym.kanflow.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -12,13 +16,28 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity // Kích hoạt Spring Security
 public class WebSecurityConfig { // Lưu ý: Không cần "extends WebSecurityConfigurerAdapter"
 
-    /**
-     * Bean này dùng để mã hóa và kiểm tra mật khẩu.
-     * Chúng ta sẽ dùng nó sau khi làm chức năng đăng ký.
-     */
+    // Inject UserDetailsService của chúng ta
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * Bean này cấu hình cách Spring Security xác thực người dùng.
+     * Nó nói rằng: "Hãy dùng UserDetailsService mà tôi cung cấp để tìm người dùng,
+     * và dùng PasswordEncoder này để kiểm tra mật khẩu".
+     */
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(passwordEncoder());
+        return authenticationManagerBuilder.build();
     }
 
     /**
