@@ -2,6 +2,7 @@ package com.codegym.kanflow.model;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "boards")
@@ -22,13 +23,52 @@ public class Board {
     @OrderBy("position ASC")
     private List<CardList> cardLists;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "board_members", // Tên của bảng trung gian
+            joinColumns = @JoinColumn(name = "board_id"), // Khóa ngoại trỏ đến bảng Board
+            inverseJoinColumns = @JoinColumn(name = "user_id") // Khóa ngoại trỏ đến bảng User
+    )
+    private List<User> members;
+
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    public User getOwner() { return owner; }
-    public void setOwner(User owner) { this.owner = owner; }
-    public List<CardList> getCardLists() { return cardLists; }
-    public void setCardLists(List<CardList> cardLists) { this.cardLists = cardLists; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+    public List<CardList> getCardLists() {
+        return cardLists;
+    }
+
+    public void setCardLists(List<CardList> cardLists) {
+        this.cardLists = cardLists;
+    }
+
+    public List<User> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<User> members) {
+        this.members = members;
+    }
 }

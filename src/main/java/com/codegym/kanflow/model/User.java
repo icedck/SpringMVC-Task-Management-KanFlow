@@ -20,15 +20,55 @@ public class User {
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
     private List<Board> boards;
 
+    @ManyToMany(mappedBy = "members")
+    private List<Board> sharedBoards;
+
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public List<Board> getBoards() { return boards; }
-    public void setBoards(List<Board> boards) { this.boards = boards; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public List<Board> getBoards() {
+        return boards;
+    }
+
+    public void setBoards(List<Board> boards) {
+        this.boards = boards;
+    }
+
+    public List<Board> getSharedBoards() {
+        return sharedBoards;
+    }
+
+    public void setSharedBoards(List<Board> sharedBoards) {
+        this.sharedBoards = sharedBoards;
+    }
 }

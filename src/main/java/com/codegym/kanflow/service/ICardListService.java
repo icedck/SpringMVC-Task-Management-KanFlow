@@ -19,6 +19,8 @@ public interface ICardListService {
      */
     CardList findById(Long id); // <-- THÊM DÒNG NÀY
 
+    CardList findByIdWithBoard(Long id);
+
     void deleteById(Long id);
 
     void updatePositions(List<Long> listIds);

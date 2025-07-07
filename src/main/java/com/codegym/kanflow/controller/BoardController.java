@@ -28,7 +28,7 @@ public class BoardController {
         User currentUser = userService.findByUsername(principal.getName());
 
         // Lấy danh sách các board chỉ thuộc về người dùng này
-        List<Board> boards = boardService.findAllByOwner(currentUser);
+        List<Board> boards = boardService.findByUser(currentUser);
 
         modelAndView.addObject("boards", boards);
         return modelAndView;
@@ -58,8 +58,12 @@ public class BoardController {
     }
 
     @GetMapping("/{id}")
-    public ModelAndView showBoardDetails(@PathVariable Long id) {
-        // Thay đổi lời gọi ở đây
+    public ModelAndView showBoardDetails(@PathVariable Long id, Principal principal) {
+// Kiểm tra quyền truy cập trước khi làm bất cứ điều gì
+        if (!boardService.hasAccess(id, principal.getName())) {
+            // Có thể trả về trang lỗi "Access Denied"
+            return new ModelAndView("error/403"); // Tạo file 403.html đơn giản
+        }
         Board board = boardService.findByIdWithDetails(id);
 
         if (board != null) {

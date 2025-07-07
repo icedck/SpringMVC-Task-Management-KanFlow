@@ -116,6 +116,7 @@
             border-radius: 3px;
             cursor: pointer;
         }
+
         /* CSS for Modal */
         .modal-overlay {
             position: fixed;
@@ -129,6 +130,7 @@
             align-items: center;
             z-index: 1000;
         }
+
         .modal-content {
             background-color: #f4f5f7;
             padding: 20px;
@@ -138,6 +140,7 @@
             position: relative;
             color: #172B4D;
         }
+
         .close-modal {
             position: absolute;
             top: 10px;
@@ -147,7 +150,11 @@
             background: none;
             cursor: pointer;
         }
-        #modal-card-content h2 { margin-top: 0; }
+
+        #modal-card-content h2 {
+            margin-top: 0;
+        }
+
         #modal-card-description {
             width: 100%;
             box-sizing: border-box;
@@ -156,6 +163,7 @@
             padding: 8px;
             font-family: inherit;
         }
+
         #save-card-details {
             margin-top: 15px;
             padding: 10px 15px;
@@ -167,7 +175,11 @@
         }
 
         /* CSS MỚI CHO NÚT XÓA */
-        .card { position: relative; } /* Thêm để nút xóa có thể định vị bên trong */
+        .card {
+            position: relative;
+        }
+
+        /* Thêm để nút xóa có thể định vị bên trong */
         .card-delete-btn {
             position: absolute;
             top: 2px;
@@ -182,8 +194,15 @@
             padding: 2px 5px;
             border-radius: 3px;
         }
-        .card:hover .card-delete-btn { display: block; } /* Hiện nút khi di chuột qua card */
-        .card-delete-btn:hover { background-color: #dfe1e6; }
+
+        .card:hover .card-delete-btn {
+            display: block;
+        }
+
+        /* Hiện nút khi di chuột qua card */
+        .card-delete-btn:hover {
+            background-color: #dfe1e6;
+        }
 
         .list-title {
             font-weight: bold;
@@ -191,17 +210,33 @@
             padding: 5px;
             border-radius: 3px;
         }
+
         .list-title:focus {
             background-color: white;
             outline: 2px solid #007bff;
         }
+
         .list-delete-btn {
             float: right; /* Cho nút sang bên phải */
-            border: none; background: none; font-size: 18px; cursor: pointer;
-            color: #6b778c; display: none; padding: 2px 5px; border-radius: 3px;
+            border: none;
+            background: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #6b778c;
+            display: none;
+            padding: 2px 5px;
+            border-radius: 3px;
         }
-        .card-list:hover .list-delete-btn { display: block; } /* Hiện nút khi di chuột qua list */
-        .list-delete-btn:hover { background-color: #dfe1e6; }
+
+        .card-list:hover .list-delete-btn {
+            display: block;
+        }
+
+        /* Hiện nút khi di chuột qua list */
+        .list-delete-btn:hover {
+            background-color: #dfe1e6;
+        }
+
         .sortable-placeholder {
             background-color: #dfe1e6;
             border: 2px dashed #ccc;
@@ -211,18 +246,87 @@
         }
 
         .list-placeholder {
-            background-color: rgba(0,0,0,0.2);
+            background-color: rgba(0, 0, 0, 0.2);
             border: 2px dashed #a0a0a0;
             border-radius: 3px;
             margin: 10px;
             min-width: 272px;
             height: 100px; /* Tùy chỉnh chiều cao */
         }
+
+        .board-members-section {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .member-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #dfe1e6;
+            color: #172B4D;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        .invite-form {
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .invite-form input {
+            border-radius: 3px;
+            border: 1px solid white;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .invite-form input::placeholder {
+            color: #f0f0f0;
+        }
+
+        .invite-form button {
+            border-radius: 3px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .invite-form button:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
     </style>
 </head>
 <body>
 <div class="board-header">
     <h1 th:text="${board.title}">Board Title</h1>
+
+    <!-- KHU VỰC THÀNH VIÊN (MỚI) -->
+    <div class="board-members-section">
+        <div th:each="member : ${board.members}" class="member-avatar" th:title="${member.username}">
+            <!-- Lấy chữ cái đầu của username làm avatar -->
+            <span th:text="${#strings.substring(member.username, 0, 1).toUpperCase()}"></span>
+        </div>
+
+        <!-- Form mời thành viên (chỉ owner mới thấy) -->
+        <div th:if="${#authentication.name == board.owner.username}" class="invite-form">
+            <form id="invite-member-form">
+                <input type="text" id="invite-username" placeholder="Enter username..." required>
+                <button type="submit">Invite</button>
+            </form>
+        </div>
+    </div>
 </div>
 
 <div class="board-container" id="board-container">
@@ -271,367 +375,288 @@
     <div class="modal-content">
         <button class="close-modal">×</button>
         <div id="modal-card-content">
-            <div id="modal-card-title" contenteditable="true" style="font-size: 24px; font-weight: bold; margin-bottom: 15px; border: 1px solid transparent; padding: 5px; border-radius: 3px;"></div>
+            <div id="modal-card-title" contenteditable="true"
+                 style="font-size: 24px; font-weight: bold; margin-bottom: 15px; border: 1px solid transparent; padding: 5px; border-radius: 3px;"></div>
 
             <p style="margin-top: 20px; font-weight: bold;">Description</p>
-            <textarea id="modal-card-description" rows="4" style="width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 3px; padding: 8px; font-family: inherit;"></textarea>
+            <textarea id="modal-card-description" rows="4"
+                      style="width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 3px; padding: 8px; font-family: inherit;"></textarea>
 
             <button id="save-card-details">Save</button>
-            <button id="delete-card-from-modal" style="background-color: #cf513d; color: white; border: none; padding: 10px 15px; border-radius: 3px; cursor: pointer;">Delete</button>
+            <button id="delete-card-from-modal"
+                    style="background-color: #cf513d; color: white; border: none; padding: 10px 15px; border-radius: 3px; cursor: pointer;">
+                Delete
+            </button>
         </div>
     </div>
 </div>
 
-<!-- KHỐI SCRIPT GIỮ NGUYÊN NHƯ CŨ -->
 <script th:inline="javascript">
+    /*<![CDATA[*/
+
+    // ===================================
+    // KHAI BÁO BIẾN TOÀN CỤC
+    // ===================================
     const boardId = /*[[${board.id}]]*/ 'default';
 
-    /* ====================================
-     *      LOGIC FOR CARD LISTS
-     * ==================================== */
+    // ===================================
+    // CÁC HÀM TẠO HTML (TEMPLATES)
+    // ===================================
     function createListHtml(listDto) {
         return `
-        <div class="card-list" data-list-id="${listDto.id}">
-            <div class="card-list-header">
-                <div class="list-title" contenteditable="true">${listDto.title}</div>
-                <button class="list-delete-btn">×</button>
+            <div class="card-list" data-list-id="${listDto.id}">
+                <div class="card-list-header">
+                    <div class="list-title" contenteditable="true">${listDto.title}</div>
+                    <button class="list-delete-btn">×</button>
+                </div>
+                <div class="card-container"></div>
+                <div class="add-card-form-container">
+                    <form class="add-card-form">
+                        <input type="text" class="new-card-title" placeholder="Enter a title for this card..." required />
+                        <button type="submit">Add Card</button>
+                    </form>
+                </div>
             </div>
-            <div class="card-container"></div>
-            <div class="add-card-form-container">
-                <form class="add-card-form">
-                    <input type="text" class="new-card-title" placeholder="Enter a title for this card..." required />
-                    <button type="submit">Add Card</button>
-                </form>
-            </div>
-        </div>
-    `;
+        `;
     }
 
-    $('#add-list-form').on('submit', function (event) {
-        event.preventDefault();
-        let listTitle = $('#new-list-title').val().trim();
-        if (!listTitle) return;
-
-        let newListDto = {title: listTitle};
-
-        $.ajax({
-            headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
-            type: 'POST',
-            url: `/api/lists?boardId=${boardId}`,
-            data: JSON.stringify(newListDto),
-            success: function (responseDto) {
-                let newListElement = createListHtml(responseDto);
-                // Chèn list mới vào trước cái div bọc form add-list
-                $('.add-list-wrapper').before(newListElement);
-                $('#new-list-title').val('');
-            },
-            error: function (error) {
-                console.error('Error creating list:', error);
-                alert('An error occurred while creating the list.');
-            }
-        });
-    });
-
-    /* ====================================
-     *      LOGIC FOR CARDS
-     * ==================================== */
     function createCardHtml(cardDto) {
         return `
-        <div class="card" data-card-id="${cardDto.id}">
-            <span>${cardDto.title}</span>
-            <button class="card-delete-btn">×</button>
-        </div>
-    `;
+            <div class="card" data-card-id="${cardDto.id}">
+                <span>${cardDto.title}</span>
+                <button class="card-delete-btn">×</button>
+            </div>
+        `;
     }
 
-    $(document).on('submit', '.add-card-form', function (event) {
-        event.preventDefault();
-        let form = $(this);
-        let cardTitleInput = form.find('.new-card-title');
-        let cardTitle = cardTitleInput.val().trim();
-        if (!cardTitle) return;
+    // ===================================
+    // LOGIC CHÍNH KHI TRANG ĐÃ SẴN SÀNG
+    // ===================================
+    $(document).ready(function () {
 
-        let listId = form.closest('.card-list').data('list-id');
-        let newCardDto = {title: cardTitle};
-
-        $.ajax({
-            headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
-            type: 'POST',
-            url: `/api/cards?listId=${listId}`,
-            data: JSON.stringify(newCardDto),
-            success: function (responseDto) {
-                let newCardElement = createCardHtml(responseDto);
-                form.closest('.card-list').find('.card-container').append(newCardElement);
-                cardTitleInput.val('');
-            },
-            error: function (error) {
-                console.error('Error creating card:', error);
-                alert('An error occurred while creating the card.');
-            }
-        });
-    });
-
-    // Bắt sự kiện click vào một card
-    $(document).on('click', '.card', function() {
-        let card = $(this);
-        let cardId = card.data('card-id');
-        $('#card-modal').data('current-card-id', cardId); // Lưu cardId vào modal để dùng sau
-
-        // Gọi AJAX để lấy chi tiết card
-        $.ajax({
-            type: 'GET',
-            url: `/api/cards/${cardId}`,
-            success: function(cardDto) {
-                // Đổ dữ liệu vào modal
-                $('#modal-card-title').text(cardDto.title);
-                $('#modal-card-description').val(cardDto.description);
-                // Hiển thị modal
-                $('#card-modal').show();
-            },
-            error: function() {
-                alert('Could not fetch card details.');
-            }
-        });
-    });
-
-    // Bắt sự kiện click nút đóng modal
-    $('.close-modal').on('click', function() {
-        $('#card-modal').hide();
-    });
-
-    // Bắt sự kiện click ra ngoài vùng modal để đóng
-    $('#card-modal').on('click', function(event) {
-        if (event.target === this) {
-            $(this).hide();
-        }
-    });
-
-    $('#save-card-details').on('click', function() {
-        // 1. Lấy ID của card hiện tại đang được mở trong modal
-        let cardId = $('#card-modal').data('current-card-id');
-        if (!cardId) {
-            console.error('Could not find current card ID in modal.');
-            return;
-        }
-
-        // 2. Lấy dữ liệu đã được người dùng chỉnh sửa từ các thẻ input trong modal
-        let updatedTitle = $('#modal-card-title').text().trim(); // .text() để lấy nội dung từ div contenteditable
-        let updatedDescription = $('#modal-card-description').val().trim();
-
-        if (!updatedTitle) {
-            alert('Card title cannot be empty.');
-            return;
-        }
-
-        // 3. Tạo một đối tượng DTO để gửi lên server
-        let updatedCardDto = {
-            title: updatedTitle,
-            description: updatedDescription
-        };
-
-        // 4. Gửi yêu cầu AJAX bằng phương thức PUT đến API
-        $.ajax({
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            type: 'PUT',
-            url: `/api/cards/${cardId}`, // URL của API cập nhật
-            data: JSON.stringify(updatedCardDto), // Chuyển đối tượng JS thành chuỗi JSON
-            success: function(responseDto) {
-                // Khi API trả về thành công (mã 200 OK)
-                console.log('Card updated successfully:', responseDto);
-
-                // 5. Cập nhật lại tiêu đề của card trên giao diện board chính
-                // Tìm card trên board bằng thuộc tính data-card-id và cập nhật text của nó
-                $(`.card[data-card-id="${cardId}"] span`).text(responseDto.title);
-
-                // 6. Đóng modal
-                $('#card-modal').hide();
-            },
-            error: function(error) {
-                // Khi API trả về lỗi
-                console.error('Error updating card:', error);
-                alert('Could not update card details. Please try again.');
-            }
-        });
-    });
-
-    // Tạo một hàm chung để xử lý logic xóa để tránh lặp code
-    function deleteCard(cardId) {
-        // Hỏi người dùng xác nhận trước khi xóa
-        if (!confirm('Are you sure you want to permanently delete this card?')) {
-            return; // Nếu người dùng nhấn "Cancel", không làm gì cả
-        }
-
-        // Gửi yêu cầu AJAX đến API DELETE
-        $.ajax({
-            type: 'DELETE',
-            url: `/api/cards/${cardId}`,
-            success: function() {
-                console.log('Card deleted successfully: ' + cardId);
-
-                // Xóa phần tử HTML của card khỏi giao diện với hiệu ứng mờ dần
-                $(`.card[data-card-id="${cardId}"]`).fadeOut(300, function() { $(this).remove(); });
-
-                // Nếu modal đang mở cho card này, hãy đóng nó lại
-                if ($('#card-modal').data('current-card-id') == cardId) {
-                    $('#card-modal').hide();
-                }
-            },
-            error: function(error) {
-                console.error('Error deleting card:', error);
-                alert('Could not delete the card.');
-            }
-        });
-    }
-
-    // Bắt sự kiện click vào nút xóa '×' trên card
-    // Dùng event delegation vì các card có thể được tạo động
-    $(document).on('click', '.card-delete-btn', function(event) {
-        event.stopPropagation(); // Ngăn sự kiện click bị lan ra thẻ cha (.card) và mở modal
-        let cardId = $(this).closest('.card').data('card-id');
-        deleteCard(cardId);
-    });
-
-    // Bắt sự kiện click vào nút "Delete" trong modal
-    $('#delete-card-from-modal').on('click', function() {
-        let cardId = $('#card-modal').data('current-card-id');
-        if (cardId) {
-            deleteCard(cardId);
-        }
-    });
-
-    $(document).on('blur', '.list-title', function() {
-        let listTitleElement = $(this);
-        let listId = listTitleElement.closest('.card-list').data('list-id');
-        let newTitle = listTitleElement.text().trim();
-
-        if (!newTitle) {
-            alert("List title cannot be empty. Reverting to original.");
-            // Cần có logic để lấy lại title cũ, tạm thời ta không cho phép rỗng
-            // Hoặc có thể reload trang để lấy lại trạng thái cũ
-            // location.reload();
-            return;
-        }
-
-        let updatedListDto = {
-            title: newTitle
-        };
-
-        $.ajax({
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-            type: 'PUT',
-            url: `/api/lists/${listId}`,
-            data: JSON.stringify(updatedListDto),
-            success: function(responseDto) {
-                console.log('List updated:', responseDto);
-                // Cập nhật lại title trên giao diện để đảm bảo tính nhất quán (dù nó đã được sửa)
-                listTitleElement.text(responseDto.title);
-            },
-            error: function() {
-                alert('Could not update the list title.');
-                // Nên có logic để khôi phục lại title cũ ở đây
-            }
-        });
-    });
-
-    $(document).on('click', '.list-delete-btn', function() {
-        let listElement = $(this).closest('.card-list');
-        let listId = listElement.data('list-id');
-
-        if (!confirm('Are you sure you want to delete this list and all its cards?')) {
-            return;
-        }
-
-        $.ajax({
-            type: 'DELETE',
-            url: `/api/lists/${listId}`,
-            success: function() {
-                console.log('List deleted successfully:', listId);
-                // Xóa list khỏi giao diện với hiệu ứng
-                listElement.fadeOut(300, function() { $(this).remove(); });
-            },
-            error: function() {
-                alert('Could not delete the list.');
-            }
-        });
-    });
-
-    /* ====================================
- *      LOGIC FOR DRAG & DROP (PHIÊN BẢN TỐI ƯU)
- * ==================================== */
-    $(function() {
-        // Hàm helper duy nhất chúng ta cần: gọi API move
+        // ---------------------------------
+        // LOGIC KÉO-THẢ (DRAG & DROP)
+        // ---------------------------------
         function moveCardApi(cardId, targetListId, newPosition) {
             $.ajax({
-                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
                 type: 'PUT',
                 url: `/api/cards/${cardId}/move`,
-                data: JSON.stringify({
-                    targetListId: targetListId,
-                    newPosition: newPosition
-                }),
-                success: function() {
-                    console.log(`Card ${cardId} moved to list ${targetListId} at position ${newPosition}`);
-                },
-                error: function() {
-                    alert('Failed to move the card. The board might be out of sync. Please refresh.');
-                    // Trong trường hợp lỗi, tốt nhất là thông báo người dùng tải lại trang
-                    // để tránh các hành động sai trên giao diện không đồng bộ với CSDL.
-                }
+                data: JSON.stringify({ targetListId: targetListId, newPosition: newPosition }),
+                success: function () { console.log(`Card ${cardId} moved successfully.`); },
+                error: function () { alert('Failed to move the card. Please refresh.'); }
             });
         }
 
-        // Kích hoạt Sortable trên tất cả các .card-container
-        $(".card-container").sortable({
+        const cardSortableOptions = {
             items: ".card",
             placeholder: "sortable-placeholder",
             cursor: "move",
             connectWith: ".card-container",
-
-            // Sự kiện 'stop' được gọi khi người dùng thả chuột, bất kể là trong list cũ hay mới.
-            // Nó đơn giản và hiệu quả hơn việc dùng cả 'update' và 'receive'.
-            stop: function(event, ui) {
-                // Lấy thông tin cần thiết từ card vừa được thả
+            stop: function (event, ui) {
                 let cardId = ui.item.data('card-id');
                 let targetListId = ui.item.closest('.card-list').data('list-id');
                 let newPosition = ui.item.index();
-
-                // Gọi API để backend xử lý toàn bộ logic
                 moveCardApi(cardId, targetListId, newPosition);
             }
-        }).disableSelection();
+        };
 
-        // KÍCH HOẠT SORTABLE CHO VÙNG CHỨA CÁC LIST (MỚI)
-        $("#board-container").sortable({
-            items: ".card-list", // Chỉ kéo-thả được các phần tử .card-list
-            placeholder: "list-placeholder", // Class cho vị trí giữ chỗ
+        $('.card-container').sortable(cardSortableOptions).disableSelection();
+
+        // Kích hoạt kéo-thả cho các list
+        $('#board-container').sortable({
+            items: ".card-list",
+            placeholder: "list-placeholder",
             cursor: "move",
-
-            // Sự kiện update được gọi khi việc sắp xếp các list hoàn tất
-            update: function(event, ui) {
-                let listOrder = $(this).sortable('toArray', { attribute: 'data-list-id' })
-                    .map(id => parseInt(id, 10));
-
-                console.log("New list order: ", listOrder);
-
-                // Gọi API để cập nhật vị trí các list
+            // THÊM DÒNG NÀY ĐỂ GIẢI QUYẾT XUNG ĐỘT
+            cancel: ".list-title, input, button, textarea",
+            update: function (event, ui) {
+                let listOrder = $(this).sortable('toArray', {attribute: 'data-list-id'}).map(id => parseInt(id, 10));
                 $.ajax({
-                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
                     type: 'PUT',
                     url: '/api/lists/updatePositions',
                     data: JSON.stringify(listOrder),
-                    success: function() {
-                        console.log('List positions updated successfully.');
+                    success: function () {
+                        console.log('List positions updated.');
                     },
-                    error: function() {
-                        alert('Failed to save the new list order.');
+                    error: function () {
+                        alert('Failed to save list order.');
                     }
                 });
             }
         });
+
+
+        // ---------------------------------
+        // CÁC TRÌNH XỬ LÝ SỰ KIỆN (EVENT HANDLERS)
+        // ---------------------------------
+
+        // Tạo List mới
+        $('#add-list-form').on('submit', function (event) {
+            event.preventDefault();
+            let listTitle = $('#new-list-title').val().trim();
+            if (!listTitle) return;
+            $.ajax({
+                headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+                type: 'POST',
+                url: `/api/lists?boardId=${boardId}`,
+                data: JSON.stringify({title: listTitle}),
+                success: function (responseDto) {
+                    let newListElement = $(createListHtml(responseDto));
+                    $('.add-list-wrapper').before(newListElement);
+                    newListElement.find('.card-container').sortable(cardSortableOptions).disableSelection();
+                    $('#new-list-title').val('');
+                },
+                error: function (error) { alert('An error occurred while creating the list.'); }
+            });
+        });
+
+        // Tạo Card mới
+        $(document).on('submit', '.add-card-form', function (event) {
+            event.preventDefault();
+            let form = $(this);
+            let cardTitleInput = form.find('.new-card-title');
+            let cardTitle = cardTitleInput.val().trim();
+            if (!cardTitle) return;
+            let listId = form.closest('.card-list').data('list-id');
+            $.ajax({
+                headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+                type: 'POST',
+                url: `/api/cards?listId=${listId}`,
+                data: JSON.stringify({title: cardTitle}),
+                success: function (responseDto) {
+                    let newCardElement = createCardHtml(responseDto);
+                    form.closest('.card-list').find('.card-container').append(newCardElement);
+                    cardTitleInput.val('');
+                },
+                error: function (error) { alert('An error occurred while creating the card.'); }
+            });
+        });
+
+        // Mời thành viên mới
+        $('#invite-member-form').on('submit', function(event) {
+            event.preventDefault();
+            let usernameToInvite = $('#invite-username').val().trim();
+            if (!usernameToInvite) return;
+            $.ajax({
+                type: 'POST',
+                url: `/api/boards/${boardId}/members?` + $.param({username: usernameToInvite}),
+                success: function(response) {
+                    alert(response);
+                    location.reload();
+                },
+                error: function(xhr) { alert('Error: ' + xhr.responseText); }
+            });
+        });
+
+        // Sửa tiêu đề List
+        $(document).on('focus', '.list-title', function () {
+            $(this).data('original-title', $(this).text().trim());
+        }).on('blur', '.list-title', function () {
+            let listTitleElement = $(this);
+            let originalTitle = listTitleElement.data('original-title');
+            let newTitle = listTitleElement.text().trim();
+            if (!newTitle || newTitle === originalTitle) {
+                listTitleElement.text(originalTitle);
+                return;
+            }
+            let listId = listTitleElement.closest('.card-list').data('list-id');
+            $.ajax({
+                headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+                type: 'PUT',
+                url: `/api/lists/${listId}`,
+                data: JSON.stringify({title: newTitle}),
+                success: function (responseDto) { listTitleElement.text(responseDto.title); },
+                error: function () {
+                    alert('Could not update the list title.');
+                    listTitleElement.text(originalTitle);
+                }
+            });
+        });
+
+        // Xóa List
+        $(document).on('click', '.list-delete-btn', function () {
+            let listElement = $(this).closest('.card-list');
+            if (!confirm('Are you sure you want to delete this list and all its cards?')) return;
+            $.ajax({
+                type: 'DELETE',
+                url: `/api/lists/${listElement.data('list-id')}`,
+                success: function () { listElement.fadeOut(300, function () { $(this).remove(); }); },
+                error: function () { alert('Could not delete the list.'); }
+            });
+        });
+
+        // ---------------------------------
+        // LOGIC CHO MODAL CHI TIẾT CARD
+        // ---------------------------------
+        $(document).on('click', '.card', function (event) {
+            let cardId = $(this).data('card-id');
+            $('#card-modal').data('current-card-id', cardId);
+            $.ajax({
+                type: 'GET',
+                url: `/api/cards/${cardId}`,
+                success: function (cardDto) {
+                    $('#modal-card-title').text(cardDto.title);
+                    $('#modal-card-description').val(cardDto.description);
+                    $('#card-modal').show();
+                },
+                error: function () { alert('Could not fetch card details.'); }
+            });
+        });
+
+        $('.close-modal, #card-modal').on('click', function (event) {
+            if (this === event.target || $(event.target).hasClass('close-modal')) {
+                $('#card-modal').hide();
+            }
+        });
+
+        $('#save-card-details').on('click', function () {
+            let cardId = $('#card-modal').data('current-card-id');
+            if (!cardId) return;
+            let updatedTitle = $('#modal-card-title').text().trim();
+            if (!updatedTitle) {
+                alert('Card title cannot be empty.');
+                return;
+            }
+            let updatedDescription = $('#modal-card-description').val().trim();
+            $.ajax({
+                headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+                type: 'PUT',
+                url: `/api/cards/${cardId}`,
+                data: JSON.stringify({title: updatedTitle, description: updatedDescription}),
+                success: function (responseDto) {
+                    $(`.card[data-card-id="${cardId}"] span`).text(responseDto.title);
+                    $('#card-modal').hide();
+                },
+                error: function () { alert('Could not update card details.'); }
+            });
+        });
+
+        function deleteCard(cardId) {
+            if (!confirm('Are you sure you want to permanently delete this card?')) return;
+            $.ajax({
+                type: 'DELETE',
+                url: `/api/cards/${cardId}`,
+                success: function () {
+                    $(`.card[data-card-id="${cardId}"]`).fadeOut(300, function () { $(this).remove(); });
+                    if ($('#card-modal').data('current-card-id') == cardId) { $('#card-modal').hide(); }
+                },
+                error: function () { alert('Could not delete the card.'); }
+            });
+        }
+
+        $(document).on('click', '.card-delete-btn', function (event) {
+            event.stopPropagation();
+            deleteCard($(this).closest('.card').data('card-id'));
+        });
+
+        $('#delete-card-from-modal').on('click', function () {
+            let cardId = $('#card-modal').data('current-card-id');
+            if (cardId) deleteCard(cardId);
+        });
     });
+
 </script>
 </body>
 </html>

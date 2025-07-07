@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal; // Thêm import
 import java.util.List;
 
 @RestController
@@ -17,13 +18,19 @@ import java.util.List;
 public class CardListApiController {
 
     @Autowired
-    private ICardListService cardListService; // Bây giờ có thể tiêm thành công
+    private ICardListService cardListService;
 
     @Autowired
     private IBoardService boardService;
 
     @PostMapping
-    public ResponseEntity<CardListDto> createList(@RequestBody CardListDto cardListDto, @RequestParam Long boardId) {
+    // Thêm Principal
+    public ResponseEntity<CardListDto> createList(@RequestBody CardListDto cardListDto, @RequestParam Long boardId, Principal principal) {
+        // --- KIỂM TRA QUYỀN TRUY CẬP ---
+        if (!boardService.hasAccess(boardId, principal.getName())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 403 Forbidden
+        }
+
         Board board = boardService.findById(boardId);
         if (board == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -33,43 +40,65 @@ public class CardListApiController {
         listToSave.setTitle(cardListDto.getTitle());
         listToSave.setBoard(board);
 
-        // Gọi service và nhận lại đối tượng đã được lưu
         CardList savedList = cardListService.save(listToSave);
-
-        // Chuyển từ Entity đã lưu sang DTO để trả về
         CardListDto responseDto = new CardListDto(savedList.getId(), savedList.getTitle(), savedList.getPosition());
-
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CardListDto> updateListTitle(@PathVariable Long id, @RequestBody CardListDto cardListDto) {
-        CardList listToSave = cardListService.findById(id);
-        if (listToSave == null) {
+    public ResponseEntity<CardListDto> updateListTitle(@PathVariable Long id, @RequestBody CardListDto cardListDto, Principal principal) {
+        // THAY ĐỔI Ở ĐÂY
+        CardList listToUpdate = cardListService.findByIdWithBoard(id);
+        if (listToUpdate == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        listToSave.setTitle(cardListDto.getTitle());
-        CardList savedList = cardListService.save(listToSave);
+        // Bây giờ việc kiểm tra quyền sẽ hoạt động
+        if (!boardService.hasAccess(listToUpdate.getBoard().getId(), principal.getName())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
 
+        listToUpdate.setTitle(cardListDto.getTitle());
+        CardList savedList = cardListService.save(listToUpdate);
         CardListDto responseDto = new CardListDto(savedList.getId(), savedList.getTitle(), savedList.getPosition());
-
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<CardListDto> deleteList(@PathVariable Long id) {
-        CardList listToDelete = cardListService.findById(id);
+    public ResponseEntity<Void> deleteList(@PathVariable Long id, Principal principal) {
+        // THAY ĐỔI Ở ĐÂY
+        CardList listToDelete = cardListService.findByIdWithBoard(id);
         if (listToDelete == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        // Bây giờ việc kiểm tra quyền sẽ hoạt động
+        if (!boardService.hasAccess(listToDelete.getBoard().getId(), principal.getName())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         cardListService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    // updateListPositions có thể không cần kiểm tra vì nó không trực tiếp sửa đổi 1 board
+    // nhưng để an toàn, chúng ta vẫn có thể kiểm tra board của list đầu tiên
     @PutMapping("/updatePositions")
-    public ResponseEntity<Void> updateListPositions(@RequestBody List<Long> listIds) {
+    public ResponseEntity<Void> updateListPositions(@RequestBody List<Long> listIds, Principal principal) {
+        if (listIds != null && !listIds.isEmpty()) {
+            // SỬA LẠI Ở ĐÂY: Dùng phương thức đã có để lấy cả board
+            CardList firstList = cardListService.findByIdWithBoard(listIds.get(0));
+            if (firstList != null) {
+                // Bây giờ việc kiểm tra quyền sẽ hoạt động
+                if (!boardService.hasAccess(firstList.getBoard().getId(), principal.getName())) {
+                    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                }
+            } else {
+                // Nếu không tìm thấy list đầu tiên, có thể có lỗi, nên dừng lại
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        }
+
         cardListService.updatePositions(listIds);
         return new ResponseEntity<>(HttpStatus.OK);
     }

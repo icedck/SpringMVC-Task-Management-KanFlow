@@ -11,5 +11,17 @@ public interface IBoardService {
     Board findById(Long id);
     Board findByIdWithDetails(Long id);
 
-    List<Board> findAllByOwner(User owner);
+    List<Board> findByUser(User user);
+
+    boolean hasAccess(Long boardId, String username);
+
+    /**
+     * Thêm một User vào danh sách thành viên của một Board.
+     * @param board Board cần thêm thành viên.
+     * @param user User sẽ được thêm vào.
+     */
+    void addMember(Board board, User user);
+
+    // Trả về String để chứa thông báo lỗi hoặc thành công
+    String inviteMember(Long boardId, String usernameToInvite, String currentUsername);
 }

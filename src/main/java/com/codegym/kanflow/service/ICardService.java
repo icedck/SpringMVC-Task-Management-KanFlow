@@ -9,6 +9,8 @@ public interface ICardService {
 
     Card findById(Long id);
 
+    Card findByIdWithDetails(Long id);
+
     void deleteById(Long id);
 
     void updatePositions(List<Long> cardIds);
