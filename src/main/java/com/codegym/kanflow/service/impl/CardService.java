@@ -2,18 +2,23 @@ package com.codegym.kanflow.service.impl;
 
 import com.codegym.kanflow.model.Card;
 import com.codegym.kanflow.model.CardList;
+import com.codegym.kanflow.model.User;
 import com.codegym.kanflow.repository.CardListRepository;
 import com.codegym.kanflow.repository.CardRepository;
+import com.codegym.kanflow.repository.UserRepository;
 import com.codegym.kanflow.service.ICardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
 public class CardService implements ICardService {
+    @Autowired
+    private UserRepository userRepository;
+
     @Autowired
     private CardRepository cardRepository;
 
@@ -59,45 +64,40 @@ public class CardService implements ICardService {
 
     @Override
     @Transactional
-    public void move(Long cardId, Long targetListId, int newPosition) {
-        // --- BƯỚC 1: LẤY CÁC ĐỐI TƯỢNG CẦN THIẾT TỪ CSDL ---
-        Card cardToMove = cardRepository.findById(cardId)
-                .orElseThrow(() -> new EntityNotFoundException("Card not found with id: " + cardId));
+    public void move(Card cardToMoveParam, CardList targetListParam, int newPosition) {
+        // --- BƯỚC 1: TẢI LẠI CÁC ĐỐI TƯỢNG BÊN TRONG TRANSACTION HIỆN TẠI ---
+        // Điều này đảm bảo chúng ta đang làm việc với các đối tượng "managed"
+        // và tất cả các collection con có thể được tải lên một cách an toàn.
+        Card cardToMove = cardRepository.findByIdWithDetails(cardToMoveParam.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Card to move not found"));
 
-        CardList targetList = cardListRepository.findById(targetListId)
-                .orElseThrow(() -> new EntityNotFoundException("Target List not found with id: " + targetListId));
+        CardList targetList = cardListRepository.findByIdWithBoard(targetListParam.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Target list not found"));
 
         CardList sourceList = cardToMove.getCardList();
 
-        // --- BƯỚC 2: XỬ LÝ DI CHUYỂN GIỮA CÁC LIST KHÁC NHAU ---
-        if (sourceList != null && !sourceList.getId().equals(targetList.getId())) {
-            // Lấy các card từ list nguồn, loại bỏ card đang di chuyển và sắp xếp lại
-            List<Card> sourceCards = cardRepository.findByCardListOrderByPositionAsc(sourceList);
-            sourceCards.remove(cardToMove);
-            reorderPositions(sourceCards);
-            cardRepository.saveAll(sourceCards);
+        // --- BƯỚC 2: XỬ LÝ LOGIC DI CHUYỂN ---
+        // Lấy danh sách card của list nguồn (nếu có)
+        if (sourceList != null) {
+            // Dòng này bây giờ an toàn vì đang trong transaction
+            sourceList.getCards().remove(cardToMove);
+            reorderPositions(sourceList.getCards());
         }
 
-        // --- BƯỚC 3: CẬP NHẬT LIST ĐÍCH ---
-        // Lấy tất cả các card trong list đích
-        List<Card> targetCards = cardRepository.findByCardListOrderByPositionAsc(targetList);
-
-        // Nếu card đã có trong list đích (trường hợp sắp xếp trong cùng 1 list), hãy loại bỏ nó trước
-        targetCards.remove(cardToMove);
-
-        // Chèn card vào vị trí mới
+        // Lấy danh sách card của list đích
+        // Dòng này bây giờ an toàn vì đang trong transaction
+        List<Card> targetCards = targetList.getCards();
         if (newPosition < 0) newPosition = 0;
         if (newPosition > targetCards.size()) newPosition = targetCards.size();
-        targetCards.add(newPosition, cardToMove);
 
-        // Sắp xếp lại vị trí cho toàn bộ list đích
+        targetCards.add(newPosition, cardToMove);
         reorderPositions(targetCards);
 
-        // --- BƯỚC 4: CẬP NHẬT QUAN HỆ VÀ LƯU ---
+        // --- BƯỚC 3: CẬP NHẬT QUAN HỆ ---
         cardToMove.setCardList(targetList);
 
-        // Lưu lại toàn bộ list đích đã được sắp xếp lại
-        cardRepository.saveAll(targetCards);
+        // Transaction sẽ tự động commit các thay đổi khi phương thức kết thúc.
+        // Không cần gọi save() tường minh.
     }
 
     /**
@@ -107,6 +107,33 @@ public class CardService implements ICardService {
     private void reorderPositions(List<Card> cards) {
         for (int i = 0; i < cards.size(); i++) {
             cards.get(i).setPosition(i);
+        }
+    }
+
+
+    @Override
+    @Transactional // THÊM VÀO ĐÂY
+    public void assignMember(Long cardId, Long userId) {
+        // findByIdWithDetails đã được fetch đầy đủ
+        Card card = cardRepository.findByIdWithDetails(cardId).orElse(null);
+        User user = userRepository.findById(userId).orElse(null);
+
+        if (card != null && user != null && !card.getAssignees().contains(user)) {
+            card.getAssignees().add(user);
+            // Không cần save() vì @Transactional sẽ xử lý
+        }
+    }
+
+    @Override
+    @Transactional // THÊM VÀO ĐÂY
+    public void unassignMember(Long cardId, Long userId) {
+        Card card = cardRepository.findByIdWithDetails(cardId).orElse(null);
+        User user = userRepository.findById(userId).orElse(null);
+
+        if (card != null && user != null) {
+            // Dùng removeIf cho an toàn hơn khi thao tác với collection được quản lý
+            card.getAssignees().removeIf(assignee -> assignee.getId().equals(userId));
+            // Không cần save() vì @Transactional sẽ xử lý
         }
     }
 }

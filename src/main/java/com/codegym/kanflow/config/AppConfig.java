@@ -25,9 +25,9 @@ public class AppConfig {
     public DataSource dataSource() {
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        dataSource.setUrl("jdbc:mysql://localhost:3306/kanflow_db?useSSL=false&serverTimezone=UTC");
-        dataSource.setUsername("root"); // !!! THAY BẰNG USERNAME CỦA BẠN
-        dataSource.setPassword("123456"); // !!! THAY BẰNG PASSWORD CỦA BẠN
+        dataSource.setUrl("jdbc:mysql://localhost:3306/kanflow_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC");
+        dataSource.setUsername("root");
+        dataSource.setPassword("123456");
         return dataSource;
     }
 

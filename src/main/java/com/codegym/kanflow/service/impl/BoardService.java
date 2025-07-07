@@ -55,12 +55,13 @@ public class BoardService implements IBoardService { // Thêm "implements IBoard
         if (board != null) {
             // Bước 2: Chủ động tải CardLists (Hibernate sẽ chạy 1 query nữa)
             // Vì có @OrderBy("position ASC") trong Entity Board, danh sách này sẽ được sắp xếp
-            board.getCardLists().size(); // Dùng .size() để "đánh thức" collection
+            // Dùng .size() là một "mẹo" để buộc Hibernate thực thi query tải collection
+            board.getCardLists().size();
 
-            // Bước 3: Chủ động tải Cards cho mỗi CardList (Hibernate sẽ chạy N query nữa)
-            // Vì có @OrderBy("position ASC") trong Entity CardList, các card sẽ được sắp xếp
+            // Bước 3: Chủ động tải Cards và Assignees cho mỗi CardList
+            // Vì có @OrderBy trong Entity, các card và assignee cũng sẽ được sắp xếp
             for (CardList list : board.getCardLists()) {
-                list.getCards().size(); // Dùng .size() để "đánh thức" collection
+                list.getCards().forEach(card -> card.getAssignees().size());
             }
         }
 

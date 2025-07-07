@@ -1,6 +1,7 @@
 package com.codegym.kanflow.model;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "cards")
@@ -20,15 +21,60 @@ public class Card {
     @JoinColumn(name = "card_list_id")
     private CardList cardList;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "card_assignees",
+            joinColumns = @JoinColumn(name = "card_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> assignees;
+
     // Getters and Setters...
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public int getPosition() { return position; }
-    public void setPosition(int position) { this.position = position; }
-    public CardList getCardList() { return cardList; }
-    public void setCardList(CardList cardList) { this.cardList = cardList; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
+    public CardList getCardList() {
+        return cardList;
+    }
+
+    public void setCardList(CardList cardList) {
+        this.cardList = cardList;
+    }
+
+    public List<User> getAssignees() {
+        return assignees;
+    }
+
+    public void setAssignees(List<User> assignees) {
+        this.assignees = assignees;
+    }
 }

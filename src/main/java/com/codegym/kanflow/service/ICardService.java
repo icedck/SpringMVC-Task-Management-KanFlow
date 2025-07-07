@@ -1,6 +1,7 @@
 package com.codegym.kanflow.service;
 
 import com.codegym.kanflow.model.Card;
+import com.codegym.kanflow.model.CardList;
 
 import java.util.List;
 
@@ -15,5 +16,9 @@ public interface ICardService {
 
     void updatePositions(List<Long> cardIds);
 
-    void move(Long cardId, Long targetListId, int newPosition);
+    void move(Card cardToMove, CardList targetList, int newPosition);
+
+    void assignMember(Long cardId, Long userId);
+
+    void unassignMember(Long cardId, Long userId);
 }
