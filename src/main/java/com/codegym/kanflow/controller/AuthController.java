@@ -1,7 +1,7 @@
 package com.codegym.kanflow.controller;
 
 import com.codegym.kanflow.model.User;
-import com.codegym.kanflow.service.impl.UserService;
+import com.codegym.kanflow.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,7 +16,7 @@ import javax.validation.Valid;
 @Controller
 public class AuthController {
     @Autowired
-    private UserService userService;
+    private IUserService userService;
 
     /**
      * Phương thức này xử lý các request GET đến "/login".
