@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><title>500 - Internal Server Error</title></head>
+<body>
+<h1>Oops! Something went wrong.</h1>
+<p>An unexpected error occurred. We are working to fix it.</p>
+<p>Error type: <span th:text="${error}"></span></p>
+<p><a th:href="@{/boards}">Go to my boards</a></p>
+</body>
+</html>

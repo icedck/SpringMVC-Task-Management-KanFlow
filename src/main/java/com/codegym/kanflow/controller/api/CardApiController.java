@@ -11,6 +11,7 @@ import com.codegym.kanflow.service.ICardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -54,7 +55,7 @@ public class CardApiController {
             return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
         }
         if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
-            return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
+            throw new AccessDeniedException("You do not have permission to view this card.");
         }
         List<UserDto> assigneeDtos = card.getAssignees().stream()
                 .map(user -> new UserDto(user.getId(), user.getUsername()))

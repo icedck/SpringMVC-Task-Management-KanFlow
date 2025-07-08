@@ -5,6 +5,7 @@ import com.codegym.kanflow.model.User;
 import com.codegym.kanflow.service.IBoardService;
 import com.codegym.kanflow.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -62,7 +63,7 @@ public class BoardController {
 // Kiểm tra quyền truy cập trước khi làm bất cứ điều gì
         if (!boardService.hasAccess(id, principal.getName())) {
             // Có thể trả về trang lỗi "Access Denied"
-            return new ModelAndView("error/403"); // Tạo file 403.html đơn giản
+            throw new AccessDeniedException("You do not have permission to view this board.");
         }
         Board board = boardService.findByIdWithDetails(id);
 

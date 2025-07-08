@@ -1,6 +1,9 @@
 package com.codegym.kanflow.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.Set;
 
@@ -11,8 +14,16 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotEmpty(message = "Username cannot be empty")
+    @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
     private String username;
+
+    @NotEmpty(message = "Password cannot be empty")
+    @Size(min = 3, message = "Password must have at least 3 characters")
     private String password;
+
+    @NotEmpty(message = "Email cannot be empty")
+    @Email(message = "Please provide a valid email address")
     private String email;
 
     // Quan hệ 1-Nhiều: Một User có thể sở hữu nhiều Board.
