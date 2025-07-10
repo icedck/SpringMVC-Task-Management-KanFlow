@@ -47,16 +47,17 @@ public class AuthController {
             // Thêm lỗi vào BindingResult
             bindingResult.rejectValue("username", "error.user", "Username already exists!");
         }
-
+        // Kiểm tra xem email đã tồn tại chưa
+        if (userService.findByEmail(user.getEmail()) != null) {
+            bindingResult.rejectValue("email", "error.user", "Email already exists!");
+        }
         // Nếu có lỗi validation (từ annotation hoặc từ code)
         if (bindingResult.hasErrors()) {
             // Không cần thêm attribute lỗi vào model nữa, Thymeleaf sẽ tự lấy từ BindingResult
             return "auth/register"; // Quay lại trang đăng ký
         }
-
         // Nếu không có lỗi, lưu người dùng mới
         userService.save(user);
-
         return "redirect:/login?register_success";
     }
 }

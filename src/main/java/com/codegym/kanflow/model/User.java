@@ -41,7 +41,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    @NotEmpty(message = "User must have at least one role.")
+//    @NotEmpty(message = "User must have at least one role.")
     private Set<Role> roles = new HashSet<>();
 
     // Getters and Setters

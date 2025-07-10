@@ -1,88 +1,181 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title th:text="${board.title} + ' | Kanflow'"></title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <link rel="stylesheet" th:href="@{/static/css/board.css}">
-</head>
-<body th:data-board-id="${board.id}">
-<div class="board-header">
-    <h1 th:text="${board.title}">Board Title</h1>
+    <link
+      rel="stylesheet"
+      href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+    />
+    <link rel="stylesheet" th:href="@{/static/css/board.css}" />
+  </head>
+  <body th:data-board-id="${board.id}">
+    <div class="board-header">
+      <a
+        href="/boards"
+        class="back-btn"
+        style="
+          text-decoration: none;
+          margin-right: 18px;
+          display: inline-block;
+          vertical-align: middle;
+          font-size: 18px;
+          color: #6a5acd;
+          background: #f8f9fb;
+          border-radius: 8px;
+          padding: 7px 18px;
+          border: 1.5px solid #e0e4ea;
+          font-weight: 600;
+        "
+        >← Back</a
+      >
+      <h1 th:text="${board.title}">Board Title</h1>
 
-    <div class="board-members-section">
-        <div th:each="member : ${board.members}" class="member-avatar" th:title="${member.username}">
-            <span th:text="${#strings.substring(member.username, 0, 1).toUpperCase()}"></span>
+      <div class="board-members-section">
+        <div
+          th:each="member : ${board.members}"
+          class="member-avatar"
+          th:title="${member.username}"
+        >
+          <span
+            th:text="${#strings.substring(member.username, 0, 1).toUpperCase()}"
+          ></span>
         </div>
 
-        <div th:if="${#authentication.name == board.owner.username}" class="invite-form">
-            <form id="invite-member-form">
-                <input type="text" id="invite-email" placeholder="Enter email..." required>
-                <button type="submit">Invite</button>
-            </form>
+        <div
+          th:if="${#authentication.name == board.owner.username}"
+          class="invite-form"
+        >
+          <form id="invite-member-form">
+            <input
+              type="text"
+              id="invite-email"
+              placeholder="Enter email..."
+              required
+            />
+            <button type="submit">Invite</button>
+          </form>
         </div>
+      </div>
     </div>
-</div>
 
-<div class="board-container" id="board-container">
-    <div class="card-list" th:each="list : ${board.cardLists}" th:attr="data-list-id=${list.id}">
+    <div class="board-container" id="board-container">
+      <div
+        class="card-list"
+        th:each="list : ${board.cardLists}"
+        th:attr="data-list-id=${list.id}"
+      >
         <div class="card-list-header">
-            <div class="list-title" contenteditable="true" th:text="${list.title}">List Title</div>
-            <button class="list-delete-btn">×</button>
+          <div
+            class="list-title"
+            contenteditable="true"
+            th:text="${list.title}"
+          >
+            List Title
+          </div>
+          <button class="list-delete-btn">×</button>
         </div>
         <div class="card-container">
-            <div class="card" th:each="card : ${list.cards}" th:attr="data-card-id=${card.id}">
-                <span th:text="${card.title}">Card Title</span>
-                <button class="card-delete-btn">×</button>
-                <div class="card-assignees">
-                    <div th:each="assignee : ${card.assignees}" class="member-avatar" th:title="${assignee.username}">
-                        <span th:text="${#strings.substring(assignee.username, 0, 1).toUpperCase()}"></span>
-                    </div>
-                </div>
+          <div
+            class="card"
+            th:each="card : ${list.cards}"
+            th:attr="data-card-id=${card.id}"
+          >
+            <span th:text="${card.title}">Card Title</span>
+            <button class="card-delete-btn">×</button>
+            <div class="card-assignees">
+              <div
+                th:each="assignee : ${card.assignees}"
+                class="member-avatar"
+                th:title="${assignee.username}"
+              >
+                <span
+                  th:text="${#strings.substring(assignee.username, 0, 1).toUpperCase()}"
+                ></span>
+              </div>
             </div>
+          </div>
         </div>
         <div class="add-card-form-container">
-            <form class="add-card-form">
-                <input type="text" class="new-card-title" placeholder="Enter a title for this card..." required/>
-                <button type="submit">Add Card</button>
-            </form>
+          <form class="add-card-form">
+            <input
+              type="text"
+              class="new-card-title"
+              placeholder="Enter a title for this card..."
+              required
+            />
+            <button type="submit">Add Card</button>
+          </form>
         </div>
-    </div>
+      </div>
 
-    <div class="add-list-wrapper">
+      <div class="add-list-wrapper">
         <form id="add-list-form" class="add-list-form">
-            <input type="text" id="new-list-title" placeholder="Enter list title..." required/>
-            <button type="submit">Add List</button>
+          <input
+            type="text"
+            id="new-list-title"
+            placeholder="Enter list title..."
+            required
+          />
+          <button type="submit">Add List</button>
         </form>
+      </div>
     </div>
-</div>
 
-<div id="card-modal" class="modal-overlay" style="display: none;">
-    <div class="modal-content">
+    <div id="card-modal" class="modal-overlay" style="display: none">
+      <div class="modal-content">
         <button class="close-modal">×</button>
         <div id="modal-card-content">
-            <div id="modal-card-title" contenteditable="true"
-                 style="font-size: 24px; font-weight: bold; margin-bottom: 15px; border: 1px solid transparent; padding: 5px; border-radius: 3px;"></div>
+          <div
+            id="modal-card-title"
+            contenteditable="true"
+            style="
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 15px;
+              border: 1px solid transparent;
+              padding: 5px;
+              border-radius: 3px;
+            "
+          ></div>
 
-            <p style="margin-top: 20px; font-weight: bold;">Description</p>
-            <textarea id="modal-card-description" rows="4"
-                      style="width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 3px; padding: 8px; font-family: inherit;"></textarea>
-            <div class="assignees-section">
-                <p><strong>Members</strong></p>
-                <ul id="modal-member-list" class="member-list">
-                </ul>
-            </div>
-            <button id="save-card-details">Save</button>
-            <button id="delete-card-from-modal"
-                    style="background-color: #cf513d; color: white; border: none; padding: 10px 15px; border-radius: 3px; cursor: pointer;">
-                Delete
-            </button>
+          <p style="margin-top: 20px; font-weight: bold">Description</p>
+          <textarea
+            id="modal-card-description"
+            rows="4"
+            style="
+              width: 100%;
+              box-sizing: border-box;
+              border: 1px solid #ccc;
+              border-radius: 3px;
+              padding: 8px;
+              font-family: inherit;
+            "
+          ></textarea>
+          <div class="assignees-section">
+            <p><strong>Members</strong></p>
+            <ul id="modal-member-list" class="member-list"></ul>
+          </div>
+          <button id="save-card-details">Save</button>
+          <button
+            id="delete-card-from-modal"
+            style="
+              background-color: #cf513d;
+              color: white;
+              border: none;
+              padding: 10px 15px;
+              border-radius: 3px;
+              cursor: pointer;
+            "
+          >
+            Delete
+          </button>
         </div>
+      </div>
     </div>
-</div>
 
-<script th:src="@{/static/js/board.js}"></script>
-</body>
+    <script th:src="@{/static/js/board.js}"></script>
+  </body>
 </html>
