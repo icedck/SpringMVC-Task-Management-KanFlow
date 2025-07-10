@@ -17,7 +17,7 @@ public class CardList {
     @JoinColumn(name = "board_id")
     private Board board;
 
-    @OneToMany(mappedBy = "cardList", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "cardList", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC")
     private List<Card> cards;
 

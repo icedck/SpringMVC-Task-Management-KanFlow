@@ -1,0 +1,331 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #0079BF;
+    color: white;
+    margin: 0;
+}
+
+.board-header {
+    padding: 8px 20px;
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.board-header h1 {
+    font-size: 20px;
+    margin: 5px 0;
+}
+
+.board-container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 10px;
+    overflow-x: auto;
+    height: calc(100vh - 100px);
+}
+
+.card-list {
+    background-color: #EBECF0;
+    border-radius: 3px;
+    margin: 10px;
+    padding: 10px;
+    min-width: 272px;
+    max-width: 272px;
+    color: #172B4D;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-list-header {
+    font-weight: bold;
+    padding: 5px;
+}
+
+.card-container {
+    flex-grow: 1;
+    min-height: 20px;
+}
+
+.card {
+    background-color: white;
+    border-radius: 3px;
+    padding: 10px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 0 rgba(9, 30, 66, .25);
+    cursor: pointer;
+}
+
+/* Style cho form Add List */
+.add-list-wrapper {
+    min-width: 272px;
+    margin: 10px;
+}
+
+.add-list-form {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 10px;
+    border-radius: 3px;
+}
+
+.add-list-form input {
+    width: 100%;
+    border: none;
+    padding: 8px;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.add-list-form button {
+    margin-top: 5px;
+    padding: 8px 12px;
+    background-color: #5aac44;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* Style cho form Add Card */
+.add-card-form-container {
+    margin-top: 10px;
+}
+
+.add-card-form input {
+    width: 100%;
+    border: none;
+    padding: 8px;
+    border-radius: 3px;
+    box-sizing: border-box;
+    margin-bottom: 5px;
+}
+
+.add-card-form button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* CSS for Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #f4f5f7;
+    padding: 20px;
+    border-radius: 3px;
+    width: 600px;
+    max-width: 90%;
+    position: relative;
+    color: #172B4D;
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+#modal-card-content h2 {
+    margin-top: 0;
+}
+
+#modal-card-description {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 8px;
+    font-family: inherit;
+}
+
+#save-card-details {
+    margin-top: 15px;
+    padding: 10px 15px;
+    background-color: #5aac44;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* CSS MỚI CHO NÚT XÓA */
+.card {
+    position: relative;
+}
+
+/* Thêm để nút xóa có thể định vị bên trong */
+.card-delete-btn {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    border: none;
+    background: none;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    display: none; /* Ẩn nút đi mặc định */
+    color: #6b778c;
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.card:hover .card-delete-btn {
+    display: block;
+}
+
+/* Hiện nút khi di chuột qua card */
+.card-delete-btn:hover {
+    background-color: #dfe1e6;
+}
+
+.list-title {
+    font-weight: bold;
+    font-size: 16px;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.list-title:focus {
+    background-color: white;
+    outline: 2px solid #007bff;
+}
+
+.list-delete-btn {
+    float: right; /* Cho nút sang bên phải */
+    border: none;
+    background: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #6b778c;
+    display: none;
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.card-list:hover .list-delete-btn {
+    display: block;
+}
+
+/* Hiện nút khi di chuột qua list */
+.list-delete-btn:hover {
+    background-color: #dfe1e6;
+}
+
+.sortable-placeholder {
+    background-color: #dfe1e6;
+    border: 2px dashed #ccc;
+    height: 40px; /* Tùy chỉnh chiều cao */
+    margin-bottom: 8px;
+    border-radius: 3px;
+}
+
+.list-placeholder {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 2px dashed #a0a0a0;
+    border-radius: 3px;
+    margin: 10px;
+    min-width: 272px;
+    height: 100px; /* Tùy chỉnh chiều cao */
+}
+
+.board-members-section {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.member-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #dfe1e6;
+    color: #172B4D;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.invite-form {
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.invite-form input {
+    border-radius: 3px;
+    border: 1px solid white;
+    padding: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.invite-form input::placeholder {
+    color: #f0f0f0;
+}
+
+.invite-form button {
+    border-radius: 3px;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.invite-form button:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.assignees-section {
+    margin-top: 20px;
+}
+
+.member-list {
+    list-style: none;
+    padding: 0;
+}
+
+.member-list-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.member-list-item input {
+    margin-right: 10px;
+}
+
+.card-assignees {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+}
+
+.card-assignees .member-avatar {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    margin-left: 2px;
+}

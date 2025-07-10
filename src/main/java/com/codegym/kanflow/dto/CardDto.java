@@ -15,7 +15,7 @@ public class CardDto {
     // Constructor mặc định
     public CardDto() {
         // Khởi tạo danh sách rỗng để tránh NullPointerException
-        this.assignees = Collections.emptyList();
+//        this.assignees = Collections.emptyList();
     }
 
     // Constructor cũ của bạn (chỉ cần cho việc tạo card mới từ frontend)

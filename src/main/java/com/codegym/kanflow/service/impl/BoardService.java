@@ -1,6 +1,7 @@
 package com.codegym.kanflow.service.impl;
 
 import com.codegym.kanflow.model.Board;
+import com.codegym.kanflow.model.Card;
 import com.codegym.kanflow.model.CardList;
 import com.codegym.kanflow.model.User;
 import com.codegym.kanflow.repository.BoardRepository;
@@ -49,28 +50,57 @@ public class BoardService implements IBoardService { // Thêm "implements IBoard
     @Override
     @Transactional(readOnly = true)
     public Board findByIdWithDetails(Long id) {
-        // Bước 1: Lấy Board, Owner, và Members trong một câu query
-        Board board = boardRepository.findByIdWithDetails(id).orElse(null);
+        // Bước 1: Lấy Board, Owner, và Members
+        Board board = boardRepository.findByIdWithMembersAndOwner(id).orElse(null);
 
         if (board != null) {
-            // Bước 2: Chủ động tải CardLists (Hibernate sẽ chạy 1 query nữa)
-            // Vì có @OrderBy("position ASC") trong Entity Board, danh sách này sẽ được sắp xếp
-            // Dùng .size() là một "mẹo" để buộc Hibernate thực thi query tải collection
+            // Bước 2: Chủ động tải các collection con
+            // Dùng .size() là một mẹo để buộc Hibernate thực thi query tải collection
             board.getCardLists().size();
 
-            // Bước 3: Chủ động tải Cards và Assignees cho mỗi CardList
-            // Vì có @OrderBy trong Entity, các card và assignee cũng sẽ được sắp xếp
+            // Bước 3: Tải sâu hơn vào Card và Assignees của nó
             for (CardList list : board.getCardLists()) {
-                list.getCards().forEach(card -> card.getAssignees().size());
+                for (Card card : list.getCards()) {
+                    card.getAssignees().size(); // Buộc tải danh sách assignees cho mỗi card
+                }
             }
         }
-
         return board;
     }
 
     @Override
+    @Transactional(readOnly = true) // Đảm bảo có transaction để có thể fetch lazy
     public List<Board> findByUser(User user) {
-        return boardRepository.findBoardsByUser(user);
+        List<Board> boards = boardRepository.findBoardsByUser(user);
+        // Duyệt qua danh sách để chủ động tải thông tin cần thiết
+        for (Board board : boards) {
+            // Chạm vào owner và members để buộc Hibernate tải chúng
+            // Điều này sẽ chạy các query bổ sung nhưng trong cùng một transaction
+            board.getOwner().getUsername(); // Lấy một thuộc tính bất kỳ của owner
+            board.getMembers().size();      // Lấy size để tải danh sách members
+        }
+        return boards;
+    }
+
+    @Override
+    @Transactional // Rất quan trọng! Transaction phải được bắt đầu từ đây.
+    public void deleteById(Long id) {
+        // Bước 1: Tìm board cần xóa. Dùng findById đơn giản là đủ.
+        Board boardToDelete = boardRepository.findById(id).orElse(null);
+
+        if (boardToDelete != null) {
+            // Bước 2: Dọn dẹp mối quan hệ ManyToMany.
+            // Xóa tất cả các thành viên khỏi danh sách members của board.
+            // Hành động này sẽ khiến Hibernate xóa các bản ghi tương ứng
+            // trong bảng trung gian `board_members`.
+            boardToDelete.getMembers().clear();
+
+            // Bước 3: Gọi lệnh xóa của repository.
+            // Vì đã có cascade=ALL, orphanRemoval=true trên quan hệ với CardList,
+            // Hibernate sẽ tự động xóa các CardList, và các CardList sẽ tự động
+            // xóa các Card.
+            boardRepository.delete(boardToDelete); // Dùng delete(entity) sẽ an toàn hơn deleteById(id)
+        }
     }
 
     @Override
@@ -104,13 +134,13 @@ public class BoardService implements IBoardService { // Thêm "implements IBoard
 
     @Override
     @Transactional // Rất quan trọng!
-    public String inviteMember(Long boardId, String usernameToInvite, String currentUsername) {
+    public String inviteMember(Long boardId, String email, String currentUsername) {
         Board board = findById(boardId); // Chỉ cần findById() đơn giản
-        User userToInvite = userRepository.findByUsername(usernameToInvite);
+        User userToInvite = userRepository.findByEmail(email);
         User currentUser = userRepository.findByUsername(currentUsername);
 
         if (board == null || userToInvite == null) {
-            return "Board or user to invite not found.";
+            return "Board or user with this email not found.";
         }
         if (!board.getOwner().getId().equals(currentUser.getId())) {
             return "Only the board owner can invite members.";
@@ -124,5 +154,10 @@ public class BoardService implements IBoardService { // Thêm "implements IBoard
         // Không cần save() vì transaction sẽ commit thay đổi
 
         return userToInvite.getUsername() + " has been added to the board.";
+    }
+
+    @Override
+    public Board findByIdWithOwner(Long id) {
+        return boardRepository.findByIdWithOwner(id).orElse(null);
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -22,16 +23,36 @@ public class BoardController {
 
     // Hiển thị danh sách tất cả board
     @GetMapping
-    public ModelAndView showBoardList(Principal principal) { // Nhận Principal
+    public ModelAndView showBoardList(Principal principal) {
         ModelAndView modelAndView = new ModelAndView("board/list");
 
-        // Tìm người dùng hiện tại
+        // 1. Tìm người dùng hiện tại
         User currentUser = userService.findByUsername(principal.getName());
+        Long currentUserId = currentUser.getId(); // Lấy ID ra một lần để so sánh
 
-        // Lấy danh sách các board chỉ thuộc về người dùng này
-        List<Board> boards = boardService.findByUser(currentUser);
+        // 2. Lấy TẤT CẢ các board mà người dùng có liên quan
+        List<Board> allUserBoards = boardService.findByUser(currentUser);
 
-        modelAndView.addObject("boards", boards);
+        // 3. Chuẩn bị hai danh sách rỗng để chứa kết quả phân loại
+        List<Board> ownedBoards = new ArrayList<>();
+        List<Board> joinedBoards = new ArrayList<>();
+
+        // 4. Dùng vòng lặp for-each để phân loại
+        for (Board board : allUserBoards) {
+            // Kiểm tra xem ID của owner có trùng với ID người dùng hiện tại không
+            if (board.getOwner() != null && board.getOwner().getId().equals(currentUserId)) {
+                // Nếu trùng, đây là board sở hữu
+                ownedBoards.add(board);
+            } else {
+                // Nếu không trùng, đây là board đã tham gia
+                joinedBoards.add(board);
+            }
+        }
+
+        // 5. Đưa cả hai danh sách đã phân loại vào model
+        modelAndView.addObject("ownedBoards", ownedBoards);
+        modelAndView.addObject("joinedBoards", joinedBoards);
+
         return modelAndView;
     }
 
@@ -75,5 +96,52 @@ public class BoardController {
             // Có thể tạo một file error/404.html đơn giản
             return new ModelAndView("error/404");
         }
+    }
+
+    @GetMapping("/edit/{id}")
+    public ModelAndView showEditForm(@PathVariable Long id, Principal principal) {
+        // SỬ DỤNG PHƯƠNG THỨC MỚI
+        Board board = boardService.findByIdWithOwner(id);
+
+        // --- Kiểm tra quyền ---
+        if (board == null || !board.getOwner().getUsername().equals(principal.getName())) {
+            throw new AccessDeniedException("You do not have permission to edit this board.");
+        }
+
+        ModelAndView modelAndView = new ModelAndView("board/edit");
+        modelAndView.addObject("board", board);
+        return modelAndView;
+    }
+
+    // ===== PHƯƠNG THỨC SỬA (XỬ LÝ SUBMIT) =====
+    @PostMapping("/edit")
+    public String updateBoard(@ModelAttribute("board") Board board, Principal principal) {
+        // SỬ DỤNG PHƯƠNG THỨC MỚI Ở ĐÂY NỮA
+        Board existingBoard = boardService.findByIdWithOwner(board.getId());
+
+        // --- Kiểm tra quyền ---
+        if (existingBoard == null || !existingBoard.getOwner().getUsername().equals(principal.getName())) {
+            throw new AccessDeniedException("You do not have permission to edit this board.");
+        }
+
+        existingBoard.setTitle(board.getTitle());
+        boardService.save(existingBoard);
+        return "redirect:/boards";
+    }
+
+    @PostMapping("/delete/{id}")
+    public String deleteBoard(@PathVariable Long id, Principal principal) {
+        // SỬA Ở ĐÂY: Dùng findByIdWithOwner để kiểm tra quyền
+        Board board = boardService.findByIdWithOwner(id);
+
+        // --- Kiểm tra quyền ---
+        if (board == null || !board.getOwner().getUsername().equals(principal.getName())) {
+            throw new AccessDeniedException("You do not have permission to delete this board.");
+        }
+
+        // Gọi service để xóa
+        boardService.deleteById(id);
+
+        return "redirect:/boards";
     }
 }

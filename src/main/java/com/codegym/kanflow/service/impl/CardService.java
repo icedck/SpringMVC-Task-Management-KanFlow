@@ -36,6 +36,7 @@ public class CardService implements ICardService {
     }
 
     @Override
+    @Transactional(readOnly = true) // Quan trọng!
     public Card findByIdWithDetails(Long id) {
         return cardRepository.findByIdWithDetails(id).orElse(null);
     }
@@ -135,5 +136,10 @@ public class CardService implements ICardService {
             card.getAssignees().removeIf(assignee -> assignee.getId().equals(userId));
             // Không cần save() vì @Transactional sẽ xử lý
         }
+    }
+
+    @Override
+    public List<Card> findAllByAssignee(User user) {
+        return cardRepository.findAllByAssignee(user);
     }
 }

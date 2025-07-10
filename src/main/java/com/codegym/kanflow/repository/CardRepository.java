@@ -2,6 +2,7 @@ package com.codegym.kanflow.repository;
 
 import com.codegym.kanflow.model.Card;
 import com.codegym.kanflow.model.CardList;
+import com.codegym.kanflow.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,10 +16,10 @@ public interface CardRepository extends JpaRepository<Card, Long> {
      */
     List<Card> findByCardListOrderByPositionAsc(CardList cardList); // <-- THÊM DÒNG NÀY
 
-    @Query("SELECT DISTINCT c FROM Card c " +
-            "LEFT JOIN FETCH c.cardList cl " +
-            "LEFT JOIN FETCH cl.board " +
-            "LEFT JOIN FETCH c.assignees " + // <-- THÊM DÒNG NÀY
-            "WHERE c.id = :id")
+    // Câu query này sẽ lấy Card, CardList, Board, và Assignees
+    @Query("SELECT DISTINCT c FROM Card c LEFT JOIN FETCH c.cardList cl LEFT JOIN FETCH cl.board LEFT JOIN FETCH c.assignees WHERE c.id = :id")
     Optional<Card> findByIdWithDetails(@Param("id") Long id);
+
+    @Query("SELECT c FROM Card c WHERE :user MEMBER OF c.assignees")
+    List<Card> findAllByAssignee(@Param("user") User user);
 }

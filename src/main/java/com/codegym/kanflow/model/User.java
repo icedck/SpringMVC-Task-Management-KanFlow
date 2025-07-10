@@ -4,6 +4,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +34,15 @@ public class User {
 
     @ManyToMany(mappedBy = "members")
     private List<Board> sharedBoards;
+
+    @ManyToMany(fetch = FetchType.EAGER) // Dùng EAGER để luôn tải vai trò cùng với User
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @NotEmpty(message = "User must have at least one role.")
+    private Set<Role> roles = new HashSet<>();
 
     // Getters and Setters
     public Long getId() {
@@ -81,5 +91,13 @@ public class User {
 
     public void setSharedBoards(List<Board> sharedBoards) {
         this.sharedBoards = sharedBoards;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 }

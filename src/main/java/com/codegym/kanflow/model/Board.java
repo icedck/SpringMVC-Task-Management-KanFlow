@@ -19,15 +19,15 @@ public class Board {
     private User owner;
 
     // Quan hệ 1-Nhiều: Một Board có thể chứa nhiều CardList.
-    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC")
     private List<CardList> cardLists;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
-            name = "board_members", // Tên của bảng trung gian
-            joinColumns = @JoinColumn(name = "board_id"), // Khóa ngoại trỏ đến bảng Board
-            inverseJoinColumns = @JoinColumn(name = "user_id") // Khóa ngoại trỏ đến bảng User
+            name = "board_members",
+            joinColumns = @JoinColumn(name = "board_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> members;
 

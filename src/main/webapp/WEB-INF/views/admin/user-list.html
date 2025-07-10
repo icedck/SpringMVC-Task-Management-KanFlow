@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User Management</title>
+    <!-- Thêm CSS từ trang list board để giao diện đẹp hơn -->
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f5f7;
+        }
+
+        h1 {
+            color: #172b4d;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin-top: 20px;
+            background-color: white;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            padding: 12px 15px;
+        }
+
+        th {
+            background-color: #fafbfc;
+            font-weight: 600;
+            color: #5e6c84;
+        }
+
+        .action-link {
+            font-size: 13px;
+            padding: 4px 8px;
+            border-radius: 3px;
+            color: #5e6c84;
+            background-color: #f4f5f7;
+            border: 1px solid transparent;
+            text-decoration: none;
+        }
+
+        .action-link:hover {
+            background-color: #e2e4e9;
+            text-decoration: none;
+        }
+
+        .action-link.delete-link {
+            background-color: #cf513d;
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .action-link.delete-link:hover {
+            background-color: #eb5a46;
+        }
+    </style>
+</head>
+<body>
+<h1>User Management</h1>
+<a th:href="@{/boards}">Back to My Boards</a>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Roles</th>
+        <th>Actions</th> <!-- THÊM CỘT MỚI -->
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.username}"></td>
+        <td th:text="${user.email}"></td>
+        <td>
+                    <span th:each="role, iter : ${user.roles}"
+                          th:text="${role.name.replace('ROLE_', '')} + (${iter.last} ? '' : ', ')"></span>
+        </td>
+        <!-- THÊM CÁC NÚT HÀNH ĐỘNG -->
+        <td>
+            <!-- Nút Sửa -->
+            <a th:href="@{/admin/users/edit/{id}(id=${user.id})}" class="action-link">Edit</a>
+
+            <!-- Nút Xóa (chỉ hiển thị nếu không phải là user đang đăng nhập) -->
+            <form th:if="${#authentication.name != user.username}"
+                  th:action="@{/admin/users/delete/{id}(id=${user.id})}"
+                  method="post" style="display: inline-block; margin-left: 5px;">
+                <button type="submit" class="action-link delete-link"
+                        onclick="return confirm('Are you sure you want to delete this user?')">
+                    Delete
+                </button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

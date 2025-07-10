@@ -29,6 +29,14 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     @Query("SELECT b FROM Board b WHERE b.owner = :user OR :user MEMBER OF b.members")
     List<Board> findByOwnerOrMember(@Param("user") User user);
 
-    @Query("SELECT DISTINCT b FROM Board b LEFT JOIN FETCH b.owner WHERE b.owner = :user OR :user MEMBER OF b.members")
+    @Query("SELECT DISTINCT b FROM Board b WHERE b.owner = :user OR :user MEMBER OF b.members")
     List<Board> findBoardsByUser(@Param("user") User user);
+
+    @Query("SELECT b FROM Board b JOIN FETCH b.owner WHERE b.id = :id")
+    Optional<Board> findByIdWithOwner(@Param("id") Long id);
+
+    // Câu query này sẽ lấy Board, Owner, và Members.
+    // Việc tải CardList, Card, Assignees sẽ được xử lý trong service.
+    @Query("SELECT DISTINCT b FROM Board b LEFT JOIN FETCH b.owner LEFT JOIN FETCH b.members WHERE b.id = :id")
+    Optional<Board> findByIdWithMembersAndOwner(@Param("id") Long id);
 }

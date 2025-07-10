@@ -28,10 +28,10 @@ public class BoardApiController {
     @PostMapping("/{boardId}/members")
     public ResponseEntity<String> addMemberToBoard(
             @PathVariable Long boardId,
-            @RequestParam String username,
+            @RequestParam String email,
             Principal principal) {
 
-        String resultMessage = boardService.inviteMember(boardId, username, principal.getName());
+        String resultMessage = boardService.inviteMember(boardId, email, principal.getName());
 
         // Kiểm tra thông báo trả về từ service để quyết định HttpStatus
         if (resultMessage.contains("successfully") || resultMessage.contains("added")) {
@@ -48,20 +48,19 @@ public class BoardApiController {
     // === API MỚI ĐỂ LẤY DANH SÁCH THÀNH VIÊN ===
     @GetMapping("/{boardId}/members")
     public ResponseEntity<List<UserDto>> getBoardMembers(@PathVariable Long boardId, Principal principal) {
-        // Kiểm tra xem người dùng hiện tại có quyền truy cập board này không
         if (!boardService.hasAccess(boardId, principal.getName())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        // Dùng findByIdWithDetails để đảm bảo danh sách members đã được tải
+        // Dùng findByIdWithDetails để đảm bảo mọi thứ đã được tải
         Board board = boardService.findByIdWithDetails(boardId);
         if (board == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        // Chuyển đổi danh sách User (Entity) thành danh sách UserDto
+        // Bây giờ việc mapping sẽ an toàn
         List<UserDto> memberDtos = board.getMembers().stream()
-                .map(user -> new UserDto(user.getId(), user.getUsername()))
+                .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEmail()))
                 .collect(Collectors.toList());
 
         return new ResponseEntity<>(memberDtos, HttpStatus.OK);

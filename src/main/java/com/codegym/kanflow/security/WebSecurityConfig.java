@@ -49,9 +49,16 @@ public class WebSecurityConfig { // Lưu ý: Không cần "extends WebSecurityCo
         http
                 .authorizeRequests(authorizeRequests ->
                         authorizeRequests
-                                // Cho phép tất cả mọi người truy cập vào các URL này
                                 .antMatchers("/", "/login", "/register", "/static/**", "/error/**").permitAll()
-                                // Tất cả các request còn lại đều yêu cầu phải được xác thực (đã đăng nhập)
+
+                                // ĐỊNH NGHĨA QUYỀN MỚI
+                                // Ví dụ: tạo một trang quản lý user chỉ cho ADMIN
+                                .antMatchers("/admin/**").hasRole("ADMIN")
+
+                                // Các URL của board yêu cầu vai trò USER hoặc ADMIN
+                                .antMatchers("/boards/**").hasAnyRole("USER", "ADMIN")
+                                .antMatchers("/api/**").hasAnyRole("USER", "ADMIN")
+
                                 .anyRequest().authenticated()
                 )
                 .formLogin(formLogin ->
@@ -72,6 +79,8 @@ public class WebSecurityConfig { // Lưu ý: Không cần "extends WebSecurityCo
                                 // URL sẽ chuyển đến sau khi đăng xuất thành công
                                 .logoutSuccessUrl("/login?logout")
                                 .permitAll()
+                ).exceptionHandling(exceptionHandling ->
+                        exceptionHandling.accessDeniedPage("/error/403")
                 )
                 .csrf(csrf -> csrf.disable()); // Tạm thời tắt CSRF để dễ làm việc
 

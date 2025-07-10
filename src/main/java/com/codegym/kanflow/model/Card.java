@@ -21,7 +21,7 @@ public class Card {
     @JoinColumn(name = "card_list_id")
     private CardList cardList;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
             name = "card_assignees",
             joinColumns = @JoinColumn(name = "card_id"),

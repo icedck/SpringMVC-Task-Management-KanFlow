@@ -58,8 +58,9 @@ public class CardApiController {
             throw new AccessDeniedException("You do not have permission to view this card.");
         }
         List<UserDto> assigneeDtos = card.getAssignees().stream()
-                .map(user -> new UserDto(user.getId(), user.getUsername()))
+                .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEmail()))
                 .collect(Collectors.toList());
+
         CardDto responseDto = new CardDto(card.getId(), card.getTitle(), card.getDescription(), card.getPosition(), assigneeDtos);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -77,7 +78,7 @@ public class CardApiController {
         card.setDescription(cardDto.getDescription());
         Card updatedCard = cardService.save(card);
         List<UserDto> assigneeDtos = updatedCard.getAssignees().stream()
-                .map(user -> new UserDto(user.getId(), user.getUsername()))
+                .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEmail()))
                 .collect(Collectors.toList());
         CardDto responseDto = new CardDto(updatedCard.getId(), updatedCard.getTitle(), updatedCard.getDescription(), updatedCard.getPosition(), assigneeDtos);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
