@@ -23,7 +23,7 @@ public class Board {
     @OrderBy("position ASC")
     private List<CardList> cardLists;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "board_members",
             joinColumns = @JoinColumn(name = "board_id"),

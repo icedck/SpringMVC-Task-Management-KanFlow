@@ -30,6 +30,8 @@ public class BoardController {
         User currentUser = userService.findByUsername(principal.getName());
         Long currentUserId = currentUser.getId(); // Lấy ID ra một lần để so sánh
 
+        modelAndView.addObject("currentUser", currentUser);
+
         // 2. Lấy TẤT CẢ các board mà người dùng có liên quan
         List<Board> allUserBoards = boardService.findByUser(currentUser);
 

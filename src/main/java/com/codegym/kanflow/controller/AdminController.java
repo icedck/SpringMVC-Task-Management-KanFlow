@@ -59,6 +59,12 @@ public class AdminController {
             bindingResult.rejectValue("email", "error.user", "Email already exists for another user.");
         }
 
+        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+            // Nếu không có role nào được chọn, thêm một lỗi vào BindingResult
+            // Lỗi này sẽ được gán cho trường 'roles'
+            bindingResult.rejectValue("roles", "error.user", "User must have at least one role.");
+        }
+
         // --- Kiểm tra kết quả validation ---
         if (bindingResult.hasErrors()) {
             // Nếu có lỗi, quay trở lại form edit
