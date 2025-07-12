@@ -24,4 +24,5 @@ public interface ICardService {
     void unassignMember(Long cardId, Long userId);
 
     List<Card> findAllByAssignee(User user);
+
 }

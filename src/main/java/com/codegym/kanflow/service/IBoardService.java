@@ -32,4 +32,6 @@ public interface IBoardService {
     String inviteMember(Long boardId, String usernameToInvite, String currentUsername);
 
     Board findByIdWithOwner(Long id);
+
+    String removeMember(Long boardId, Long userIdToRemove, String currentUsername);
 }

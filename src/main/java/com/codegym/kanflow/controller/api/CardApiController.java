@@ -1,5 +1,6 @@
 package com.codegym.kanflow.controller.api;
 
+import com.codegym.kanflow.dto.AttachmentDto;
 import com.codegym.kanflow.dto.CardDto;
 import com.codegym.kanflow.dto.CardMoveDto;
 import com.codegym.kanflow.dto.UserDto;
@@ -146,5 +147,30 @@ public class CardApiController {
         }
         cardService.unassignMember(cardId, userId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/{cardId}/attachments")
+    public ResponseEntity<?> getCardAttachments(@PathVariable Long cardId, Principal principal) {
+        Card card = cardService.findByIdWithDetails(cardId);
+        if (card == null) {
+            return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
+        }
+        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
+            return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
+        }
+
+        // Chuyển đổi từ Entity sang DTO
+        List<AttachmentDto> attachmentDtos = card.getAttachments().stream()
+                .map(att -> {
+                    AttachmentDto dto = new AttachmentDto();
+                    dto.setId(att.getId());
+                    dto.setFileName(att.getFileName());
+                    // Tạo URL để truy cập file
+                    dto.setUrl("/attachments/" + att.getStoredFileName());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(attachmentDtos, HttpStatus.OK);
     }
 }

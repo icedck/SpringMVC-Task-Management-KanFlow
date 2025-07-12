@@ -1,125 +1,129 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Edit User</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <style>
-      body {
-        min-height: 100vh;
-        background: linear-gradient(135deg, #6a5acd 0%, #4169e1 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <title>Edit User</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+  />
+  <style>
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #6a5acd 0%, #4169e1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-      .user-edit-container {
-        max-width: 500px;
-        background: #fff;
-        border-radius: 22px;
-        box-shadow: 0 8px 32px rgba(80, 80, 120, 0.18);
-        padding: 38px 32px 32px 32px;
-        margin: 0 auto;
-      }
+    .user-edit-container {
+      max-width: 500px;
+      background: #fff;
+      border-radius: 22px;
+      box-shadow: 0 8px 32px rgba(80, 80, 120, 0.18);
+      padding: 38px 32px 32px 32px;
+      margin: 0 auto;
+    }
 
-      .form-label {
-        color: #6a5acd;
-        font-weight: 600;
-      }
+    .form-label {
+      color: #6a5acd;
+      font-weight: 600;
+    }
 
-      .btn-kanflow {
-        background: linear-gradient(90deg, #6a5acd 60%, #4169e1 100%);
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        font-weight: 700;
-        font-size: 1.1rem;
-        padding: 12px 0;
-        box-shadow: 0 2px 8px rgba(106, 90, 205, 0.1);
-        transition: background 0.2s;
-      }
+    .btn-kanflow {
+      background: linear-gradient(90deg, #6a5acd 60%, #4169e1 100%);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 12px 0;
+      box-shadow: 0 2px 8px rgba(106, 90, 205, 0.1);
+      transition: background 0.2s;
+    }
 
-      .btn-kanflow:hover {
-        background: #4e54c8;
-      }
+    .btn-kanflow:hover {
+      background: #4e54c8;
+    }
 
-      .btn-cancel {
-        background: #e0e4ea;
-        color: #3d348b;
-        border-radius: 10px;
-        font-weight: 600;
-        margin-left: 10px;
-      }
+    .btn-cancel {
+      background: #e0e4ea;
+      color: #3d348b;
+      border-radius: 10px;
+      font-weight: 600;
+      /* XÓA DÒNG NÀY: margin-left: 10px; */
+    }
 
-      .btn-cancel:hover {
-        background: #bfc4d6;
-        color: #22223b;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="user-edit-container">
-      <h2
-        class="text-center mb-4"
-        style="font-weight: 900; color: #6a5acd; letter-spacing: 1px"
-      >
-        Chỉnh sửa người dùng
-      </h2>
-      <form th:action="@{/admin/users/edit}" th:object="${user}" method="post">
-        <input type="hidden" th:field="*{id}" />
-        <input type="hidden" th:field="*{username}" />
-        <input type="hidden" th:field="*{password}" />
-        <div class="mb-3">
-          <label for="email" class="form-label">Email</label>
-          <input
-            type="email"
-            id="email"
-            class="form-control"
-            th:field="*{email}"
-            th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
-            required
-          />
-          <div
-            th:if="${#fields.hasErrors('email')}"
-            th:errors="*{email}"
-            class="invalid-feedback"
-          ></div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Vai trò</label>
-          <div
-            th:classappend="${#fields.hasErrors('roles')} ? 'is-invalid' : ''"
-          >
-            <div th:each="role : ${allRoles}" class="form-check">
-              <input
-                type="radio"
-                class="form-check-input"
-                th:field="*{roles}"
-                th:value="${role.id}"
-                th:id="${'role-' + role.id}"
-              />
-              <label
-                class="form-check-label"
-                th:for="${'role-' + role.id}"
-                th:text="${role.name.replace('ROLE_', '')}"
-              ></label>
-            </div>
-          </div>
-          <div
-            th:if="${#fields.hasErrors('roles')}"
-            th:errors="*{roles}"
-            class="invalid-feedback d-block"
-          ></div>
-        </div>
-        <button type="submit" class="w-100 btn btn-kanflow mb-2">
-          Lưu thay đổi
-        </button>
-        <a th:href="@{/admin/users}" class="w-100 btn btn-cancel mt-2">Hủy</a>
-      </form>
+    .btn-cancel:hover {
+      background: #bfc4d6;
+      color: #22223b;
+    }
+  </style>
+</head>
+<body>
+<div class="user-edit-container">
+  <h2
+          class="text-center mb-4"
+          style="font-weight: 900; color: #6a5acd; letter-spacing: 1px"
+  >
+    Chỉnh sửa người dùng
+  </h2>
+  <form th:action="@{/admin/users/edit}" th:object="${user}" method="post">
+    <input type="hidden" th:field="*{id}" />
+    <input type="hidden" th:field="*{username}" />
+    <input type="hidden" th:field="*{password}" />
+    <div class="mb-3">
+      <label for="email" class="form-label">Email</label>
+      <input
+              type="email"
+              id="email"
+              class="form-control"
+              th:field="*{email}"
+              th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+              required
+      />
+      <div
+              th:if="${#fields.hasErrors('email')}"
+              th:errors="*{email}"
+              class="invalid-feedback"
+      ></div>
     </div>
-  </body>
+    <div class="mb-3">
+      <label class="form-label">Vai trò</label>
+      <div
+              th:classappend="${#fields.hasErrors('roles')} ? 'is-invalid' : ''"
+      >
+        <div th:each="role : ${allRoles}" class="form-check">
+          <input
+                  type="radio"
+                  class="form-check-input"
+                  th:field="*{roles}"
+                  th:value="${role.id}"
+                  th:id="${'role-' + role.id}"
+          />
+          <label
+                  class="form-check-label"
+                  th:for="${'role-' + role.id}"
+                  th:text="${role.name.replace('ROLE_', '')}"
+          ></label>
+        </div>
+      </div>
+      <div
+              th:if="${#fields.hasErrors('roles')}"
+              th:errors="*{roles}"
+              class="invalid-feedback d-block"
+      ></div>
+    </div>
+
+    <!-- BỌC CÁC NÚT TRONG DIV NÀY -->
+    <div class="d-grid gap-2">
+      <button type="submit" class="btn btn-kanflow">
+        Lưu thay đổi
+      </button>
+      <a th:href="@{/admin/users}" class="btn btn-cancel">Hủy</a>
+    </div>
+  </form>
+</div>
+</body>
 </html>

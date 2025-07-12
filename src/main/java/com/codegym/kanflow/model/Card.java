@@ -1,7 +1,9 @@
 package com.codegym.kanflow.model;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "cards")
@@ -21,13 +23,17 @@ public class Card {
     @JoinColumn(name = "card_list_id")
     private CardList cardList;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(fetch = FetchType.LAZY) // Bỏ cascade ở đây như đã thảo luận trước
     @JoinTable(
             name = "card_assignees",
             joinColumns = @JoinColumn(name = "card_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> assignees;
+    private Set<User> assignees = new HashSet<>(); // Sửa thành Set
+
+    // === SỬA LẠI TỪ LIST SANG SET ===
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Attachment> attachments = new HashSet<>();
 
     // Getters and Setters...
     public Long getId() {
@@ -70,11 +76,20 @@ public class Card {
         this.cardList = cardList;
     }
 
-    public List<User> getAssignees() {
+    public Set<User> getAssignees() {
         return assignees;
     }
 
-    public void setAssignees(List<User> assignees) {
+    public void setAssignees(Set<User> assignees) {
         this.assignees = assignees;
     }
+
+    public Set<Attachment> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(Set<Attachment> attachments) {
+        this.attachments = attachments;
+    }
+
 }

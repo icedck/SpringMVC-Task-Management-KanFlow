@@ -16,8 +16,12 @@ public interface CardRepository extends JpaRepository<Card, Long> {
      */
     List<Card> findByCardListOrderByPositionAsc(CardList cardList); // <-- THÊM DÒNG NÀY
 
-    // Câu query này sẽ lấy Card, CardList, Board, và Assignees
-    @Query("SELECT DISTINCT c FROM Card c LEFT JOIN FETCH c.cardList cl LEFT JOIN FETCH cl.board LEFT JOIN FETCH c.assignees WHERE c.id = :id")
+    @Query("SELECT DISTINCT c FROM Card c " +
+            "LEFT JOIN FETCH c.cardList cl " +
+            "LEFT JOIN FETCH cl.board " +
+            "LEFT JOIN FETCH c.assignees " +
+            "LEFT JOIN FETCH c.attachments " +
+            "WHERE c.id = :id")
     Optional<Card> findByIdWithDetails(@Param("id") Long id);
 
     @Query("SELECT c FROM Card c WHERE :user MEMBER OF c.assignees")

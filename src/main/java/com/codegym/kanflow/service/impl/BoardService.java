@@ -160,4 +160,49 @@ public class BoardService implements IBoardService { // Thêm "implements IBoard
     public Board findByIdWithOwner(Long id) {
         return boardRepository.findByIdWithOwner(id).orElse(null);
     }
+
+    @Override
+    @Transactional
+    public String removeMember(Long boardId, Long userIdToRemove, String currentUsername) {
+        Board board = boardRepository.findById(boardId).orElse(null);
+        if (board == null) {
+            return "Board not found.";
+        }
+
+        User currentUser = userRepository.findByUsername(currentUsername);
+        User userToRemove = userRepository.findById(userIdToRemove).orElse(null);
+
+        if (userToRemove == null) {
+            return "User to remove not found.";
+        }
+
+        if (!board.getOwner().getId().equals(currentUser.getId())) {
+            return "Only the board owner can remove members.";
+        }
+
+        if (board.getOwner().getId().equals(userToRemove.getId())) {
+            return "The owner cannot be removed from the board.";
+        }
+
+        if (!board.getMembers().contains(userToRemove)) {
+            return "User is not a member of this board.";
+        }
+
+        // === LOGIC MỚI: DỌN DẸP USER KHỎI CÁC CARD TRƯỚC KHI XÓA ===
+        // Vòng lặp này duyệt qua tất cả các danh sách (To Do, In Progress, ...) trong board
+        for (CardList list : board.getCardLists()) {
+            // Duyệt qua tất cả các card trong mỗi danh sách
+            for (Card card : list.getCards()) {
+                // Xóa người dùng này khỏi danh sách người được phân công của card
+                // .remove() sẽ không làm gì nếu người dùng không có trong danh sách
+                card.getAssignees().remove(userToRemove);
+            }
+        }
+        // ==============================================================
+
+        // Tiến hành xóa thành viên khỏi board
+        board.getMembers().remove(userToRemove);
+
+        return userToRemove.getUsername() + " has been removed from the board.";
+    }
 }

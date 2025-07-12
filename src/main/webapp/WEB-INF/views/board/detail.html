@@ -9,6 +9,10 @@
       rel="stylesheet"
       href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
     <link rel="stylesheet" th:href="@{/static/css/board.css}" />
   </head>
   <body th:data-board-id="${board.id}">
@@ -31,32 +35,42 @@
         "
         >← Back</a
       >
-      <h1 th:text="${board.title}">Board Title</h1>
+      <div class="header-main-content">
+        <h1 th:text="${board.title}">Board Title</h1>
+        <div class="board-members-section">
+          <div
+            th:each="member : ${board.members}"
+            class="member-avatar-wrapper"
+          >
+            <div class="member-avatar" th:title="${member.username}">
+              <span
+                th:text="${#strings.substring(member.username, 0, 1).toUpperCase()}"
+              ></span>
+            </div>
+            <button
+              class="remove-member-btn"
+              th:if="${#authentication.name == board.owner.username and member.id != board.owner.id}"
+              th:data-user-id="${member.id}"
+              title="Remove member"
+            >
+              <i class="fa-solid fa-minus"></i>
+            </button>
+          </div>
 
-      <div class="board-members-section">
-        <div
-          th:each="member : ${board.members}"
-          class="member-avatar"
-          th:title="${member.username}"
-        >
-          <span
-            th:text="${#strings.substring(member.username, 0, 1).toUpperCase()}"
-          ></span>
-        </div>
-
-        <div
-          th:if="${#authentication.name == board.owner.username}"
-          class="invite-form"
-        >
-          <form id="invite-member-form">
-            <input
-              type="text"
-              id="invite-email"
-              placeholder="Enter email..."
-              required
-            />
-            <button type="submit">Invite</button>
-          </form>
+          <div
+            th:if="${#authentication.name == board.owner.username}"
+            class="invite-form"
+          >
+            <form id="invite-member-form">
+              <input
+                type="text"
+                id="invite-email"
+                placeholder="Enter email..."
+                required
+              />
+              <button type="submit">Invite</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -157,6 +171,34 @@
           <div class="assignees-section">
             <p><strong>Members</strong></p>
             <ul id="modal-member-list" class="member-list"></ul>
+          </div>
+          <div class="attachments-section">
+            <p>
+              <strong><i class="fas fa-paperclip"></i> Attachments</strong>
+            </p>
+            <ul id="attachment-list" class="attachment-list">
+              <!-- Các file đính kèm sẽ được JS chèn vào đây -->
+            </ul>
+            <div class="attachment-upload-form">
+              <input type="file" id="file-upload-input" style="display: none" />
+              <button
+                type="button"
+                id="select-file-button"
+                class="btn-secondary"
+              >
+                <i class="fas fa-file-upload"></i> Choose File
+              </button>
+              <!-- Nút upload ban đầu sẽ bị ẩn -->
+              <button
+                type="button"
+                id="upload-file-button"
+                class="btn-primary"
+                style="display: none"
+              >
+                <i class="fas fa-check"></i> Upload
+              </button>
+              <span id="file-name-display"></span>
+            </div>
           </div>
           <button id="save-card-details">Save</button>
           <button

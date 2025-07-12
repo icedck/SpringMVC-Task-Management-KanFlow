@@ -65,4 +65,24 @@ public class BoardApiController {
 
         return new ResponseEntity<>(memberDtos, HttpStatus.OK);
     }
+
+    @DeleteMapping("/{boardId}/members/{userId}")
+    public ResponseEntity<String> removeMemberFromBoard(
+            @PathVariable Long boardId,
+            @PathVariable Long userId,
+            Principal principal) {
+
+        String resultMessage = boardService.removeMember(boardId, userId, principal.getName());
+
+        if (resultMessage.contains("removed")) {
+            return new ResponseEntity<>(resultMessage, HttpStatus.OK);
+        } else if (resultMessage.contains("not found")) {
+            return new ResponseEntity<>(resultMessage, HttpStatus.NOT_FOUND);
+        } else if (resultMessage.contains("Only the board owner")) {
+            return new ResponseEntity<>(resultMessage, HttpStatus.FORBIDDEN);
+        } else {
+            // Bao gồm cả trường hợp "owner cannot be removed" và "not a member"
+            return new ResponseEntity<>(resultMessage, HttpStatus.BAD_REQUEST);
+        }
+    }
 }

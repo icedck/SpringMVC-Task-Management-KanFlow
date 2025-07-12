@@ -19,6 +19,7 @@ import java.util.Properties;
 @EnableTransactionManagement
 @EnableJpaRepositories("com.codegym.kanflow.repository")
 @ComponentScan(basePackages = "com.codegym.kanflow")
+@PropertySource("classpath:upload_file.properties")
 @EnableAspectJAutoProxy
 public class AppConfig {
 

@@ -2,12 +2,14 @@ package com.codegym.kanflow.config;
 
 import com.codegym.kanflow.converter.StringToRoleConverter;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -22,11 +24,23 @@ import org.thymeleaf.templatemode.TemplateMode;
 @ComponentScan("com.codegym.kanflow.controller")
 public class WebConfig implements WebMvcConfigurer, ApplicationContextAware {
 
+    // Inject giá trị từ file upload_file.properties
+    @Value("${file-upload}")
+    private String fileUpload;
+
     private ApplicationContext applicationContext;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    // Bean để xử lý file upload
+    @Bean(name = "multipartResolver")
+    public CommonsMultipartResolver multipartResolver() {
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+        multipartResolver.setMaxUploadSize(20971520); // 20MB
+        return multipartResolver;
     }
 
     @Bean
@@ -44,10 +58,7 @@ public class WebConfig implements WebMvcConfigurer, ApplicationContextAware {
     public SpringTemplateEngine templateEngine() {
         SpringTemplateEngine templateEngine = new SpringTemplateEngine();
         templateEngine.setTemplateResolver(templateResolver());
-
-        // THÊM DÒNG NÀY ĐỂ TÍCH HỢP SPRING SECURITY DIALECT
         templateEngine.addDialect(new SpringSecurityDialect());
-
         return templateEngine;
     }
 
@@ -61,10 +72,13 @@ public class WebConfig implements WebMvcConfigurer, ApplicationContextAware {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-    // URL pattern: Nếu requzest có URL bắt đầu bằng /static/
-        // Location: Hãy tìm file trong thư mục /static/ bên trong webapp
+        // Cấu hình cho file static (css, js)
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("/static/");
+
+        // Cấu hình cho file đính kèm đã upload
+        registry.addResourceHandler("/attachments/**")
+                .addResourceLocations("file:" + fileUpload);
     }
 
     @Override

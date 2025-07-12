@@ -1,11 +1,158 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>Kanflow</title>
-</head>
-<body>
-<h1>Welcome to Kanflow!</h1>
-<h2>Stage 0: Configuration Successful!</h2>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Kanflow - Quản lý công việc trực quan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      body {
+        min-height: 100vh;
+        background: linear-gradient(120deg, #6a5acd 0%, #4169e1 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #22223b;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        overflow-x: hidden;
+      }
+      .intro-container {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 32px;
+        box-shadow: 0 12px 48px rgba(80, 80, 120, 0.18);
+        padding: 56px 38px 44px 38px;
+        max-width: 480px;
+        width: 100%;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        margin: 32px 0;
+      }
+      .kanflow-logo {
+        font-size: 2.8rem;
+        font-weight: 900;
+        letter-spacing: 2px;
+        color: #6a5acd;
+        margin-bottom: 8px;
+        text-shadow: 0 2px 16px rgba(80, 80, 120, 0.13);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+      .kanflow-logo i {
+        font-size: 2.2rem;
+        color: #4169e1;
+        filter: drop-shadow(0 2px 8px #6a5acd33);
+      }
+      .intro-title {
+        font-size: 2.1rem;
+        font-weight: 800;
+        color: #3d348b;
+        margin-bottom: 18px;
+        letter-spacing: 0.5px;
+        line-height: 1.2;
+      }
+      .intro-slogan {
+        font-size: 1.15rem;
+        color: #6a5acd;
+        font-weight: 600;
+        margin-bottom: 18px;
+        letter-spacing: 0.2px;
+      }
+      .intro-desc {
+        font-size: 1.08rem;
+        color: #444;
+        margin-bottom: 32px;
+        line-height: 1.6;
+      }
+      .btn-kanflow {
+        background: linear-gradient(90deg, #6a5acd 60%, #4169e1 100%);
+        color: #fff;
+        border: none;
+        border-radius: 16px;
+        font-weight: 800;
+        font-size: 1.18rem;
+        padding: 16px 0;
+        width: 100%;
+        box-shadow: 0 4px 18px rgba(106, 90, 205, 0.13);
+        transition: background 0.2s, transform 0.18s, box-shadow 0.2s;
+        margin-top: 10px;
+        letter-spacing: 0.5px;
+        text-shadow: 0 2px 8px #6a5acd22;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      .btn-kanflow:hover {
+        background: #4e54c8;
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 8px 32px rgba(106, 90, 205, 0.18);
+        color: #fff;
+        text-decoration: none;
+      }
+      .kanflow-bg-blob {
+        position: absolute;
+        top: -80px;
+        left: -80px;
+        width: 220px;
+        height: 220px;
+        background: radial-gradient(
+          circle at 40% 40%,
+          #6a5acd 60%,
+          #4169e1 100%
+        );
+        opacity: 0.18;
+        border-radius: 50%;
+        z-index: 0;
+        filter: blur(8px);
+      }
+      @media (max-width: 600px) {
+        .intro-container {
+          padding: 32px 10px 28px 10px;
+          max-width: 98vw;
+        }
+        .kanflow-logo {
+          font-size: 2rem;
+        }
+        .intro-title {
+          font-size: 1.3rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="intro-container">
+      <div class="kanflow-bg-blob"></div>
+      <div class="kanflow-logo">
+        <i class="fa-solid fa-layer-group"></i> Kanflow
+      </div>
+      <div class="intro-title">
+        Nền tảng quản lý công việc trực quan cho nhóm hiện đại
+      </div>
+      <div class="intro-slogan">Tối ưu teamwork, tăng tốc hiệu suất!</div>
+      <div class="intro-desc">
+        Kanflow giúp bạn tổ chức, theo dõi và cộng tác trên các dự án, bảng công
+        việc một cách dễ dàng.<br />
+        <b
+          >Tạo bảng, thêm thành viên, kéo thả thẻ công việc, phân quyền linh
+          hoạt.</b
+        ><br />
+        Giao diện hiện đại, thân thiện, phù hợp cho cá nhân, nhóm và doanh
+        nghiệp.
+      </div>
+      <a href="/login" class="btn btn-kanflow">
+        <i class="fa-solid fa-clipboard-list"></i> Bắt đầu tạo bảng của bạn
+      </a>
+    </div>
+  </body>
 </html>

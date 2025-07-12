@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Kanflow - All Boards</title>
     <link
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
             rel="stylesheet"
     />
     <style>
@@ -145,7 +145,7 @@
             word-break: break-all; /* Để email dài không làm vỡ layout */
         }
 
-        .dropdown-content button {
+        .dropdown-content a, .dropdown-content button {
             color: black;
             padding: 12px 16px;
             text-decoration: none;
@@ -160,7 +160,7 @@
             font-size: 1rem;
         }
 
-        .dropdown-content button:hover {
+        .dropdown-content a:hover, .dropdown-content button:hover {
             background-color: #e2e6ea;
         }
         .dropdown-content .dropdown-divider {
@@ -400,6 +400,17 @@
                         <strong th:text="${currentUser.username}">username</strong>
                         <p th:text="${currentUser.email}">user.email@example.com</p>
                     </div>
+
+                    <!-- === PHẦN THÊM MỚI === -->
+                    <!-- Chỉ hiển thị khối này nếu user có vai trò 'ADMIN' -->
+                    <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                        <div class="dropdown-divider"></div>
+                        <a th:href="@{/admin/users}">
+                            <i class="fa-solid fa-users-gear"></i> Manage Users
+                        </a>
+                    </div>
+                    <!-- ======================= -->
+
                     <div class="dropdown-divider"></div>
                     <!-- Nút Đăng xuất -->
                     <button type="submit" form="logoutForm">
@@ -414,7 +425,7 @@
     <!-- Owned Boards Section -->
     <div class="section">
         <h2><i class="fas fa-crown"></i> Owned Boards</h2>
-
+        <!-- ... nội dung không đổi ... -->
         <div th:if="${ownedBoards.isEmpty()}" class="empty-state">
             <i
                     class="fas fa-folder-open"
@@ -474,7 +485,7 @@
     <!-- Joined Boards Section -->
     <div class="section">
         <h2><i class="fas fa-users"></i> Joined Boards</h2>
-
+        <!-- ... nội dung không đổi ... -->
         <div th:if="${joinedBoards.isEmpty()}" class="empty-state">
             <i
                     class="fas fa-handshake"

@@ -142,4 +142,5 @@ public class CardService implements ICardService {
     public List<Card> findAllByAssignee(User user) {
         return cardRepository.findAllByAssignee(user);
     }
+
 }
