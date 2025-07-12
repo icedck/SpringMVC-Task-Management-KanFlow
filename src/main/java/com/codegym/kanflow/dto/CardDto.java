@@ -2,39 +2,43 @@ package com.codegym.kanflow.dto;
 
 import java.util.Collections;
 import java.util.List; // Thêm import này
+import java.util.Set;
 
 public class CardDto {
     private Long id;
     private String title;
     private String description;
     private int position;
-
-    // 1. Thêm trường mới để chứa danh sách người được gán
     private List<UserDto> assignees;
+
+    // === THÊM TRƯỜNG MỚI CHO LABELS ===
+    private Set<LabelDto> labels;
 
     // Constructor mặc định
     public CardDto() {
-        // Khởi tạo danh sách rỗng để tránh NullPointerException
-//        this.assignees = Collections.emptyList();
+        this.labels = Collections.emptySet(); // Khởi tạo để tránh null
     }
 
-    // Constructor cũ của bạn (chỉ cần cho việc tạo card mới từ frontend)
-    public CardDto(Long id, String title, String description, int position) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.position = position;
-        this.assignees = Collections.emptyList(); // Gán danh sách rỗng
-    }
-
-    // 2. Tạo một Constructor đầy đủ mới để dùng trong Controller
+    // Constructor cũ của bạn (có thể giữ lại hoặc xóa đi nếu không dùng)
     public CardDto(Long id, String title, String description, int position, List<UserDto> assignees) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.position = position;
         this.assignees = assignees;
+        this.labels = Collections.emptySet(); // Gán danh sách rỗng
     }
+
+    // === TẠO MỘT CONSTRUCTOR ĐẦY ĐỦ MỚI ===
+    public CardDto(Long id, String title, String description, int position, List<UserDto> assignees, Set<LabelDto> labels) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.position = position;
+        this.assignees = assignees;
+        this.labels = labels;
+    }
+
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -49,4 +53,7 @@ public class CardDto {
     // 3. Thêm Getter và Setter cho trường mới
     public List<UserDto> getAssignees() { return assignees; }
     public void setAssignees(List<UserDto> assignees) { this.assignees = assignees; }
+
+    public Set<LabelDto> getLabels() { return labels; }
+    public void setLabels(Set<LabelDto> labels) { this.labels = labels; }
 }

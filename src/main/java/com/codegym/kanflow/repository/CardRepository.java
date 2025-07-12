@@ -21,6 +21,7 @@ public interface CardRepository extends JpaRepository<Card, Long> {
             "LEFT JOIN FETCH cl.board " +
             "LEFT JOIN FETCH c.assignees " +
             "LEFT JOIN FETCH c.attachments " +
+            "LEFT JOIN FETCH c.labels " +
             "WHERE c.id = :id")
     Optional<Card> findByIdWithDetails(@Param("id") Long id);
 

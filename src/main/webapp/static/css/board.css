@@ -209,6 +209,13 @@ body {
   position: relative;
   color: #22223b;
   box-shadow: 0 8px 32px rgba(80, 80, 120, 0.18);
+
+  max-height: 90vh; /* Giới hạn chiều cao tối đa bằng 90% chiều cao màn hình */
+  overflow-y: auto; /* Tự động thêm thanh cuộn dọc khi nội dung bị tràn */
+}
+
+.modal-content::-webkit-scrollbar {
+  display: none;
 }
 
 .close-modal {
@@ -571,4 +578,78 @@ body {
   font-style: italic;
   color: #5e6c84;
   font-size: 0.9em;
+}
+/* ---- Styles cho Labels ---- */
+.card-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.card-label {
+  height: 8px;
+  width: 40px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  color: white; /* Ẩn text ban đầu */
+  font-size: 0;
+  font-weight: 600;
+}
+
+.card:hover .card-label {
+  width: auto;
+  height: auto;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.labels-section {
+  margin-top: 20px;
+  border-top: 1px solid #e0e4ea;
+  padding-top: 15px;
+}
+
+.labels-section > p {
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  color: #3d348b;
+}
+
+.label-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.label-list-item {
+  padding: 8px 12px;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 100px;
+  transition: filter 0.2s;
+}
+
+.label-list-item:hover {
+  filter: brightness(1.1);
+}
+
+.label-list-item.selected .fa-check {
+  display: inline-block; /* Hiện dấu tick khi được chọn */
+  margin-left: 10px;
+}
+
+.label-list-item .fa-check {
+  display: none; /* Ẩn dấu tick mặc định */
 }

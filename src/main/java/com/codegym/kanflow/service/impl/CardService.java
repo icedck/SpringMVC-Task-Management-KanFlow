@@ -2,9 +2,11 @@ package com.codegym.kanflow.service.impl;
 
 import com.codegym.kanflow.model.Card;
 import com.codegym.kanflow.model.CardList;
+import com.codegym.kanflow.model.Label;
 import com.codegym.kanflow.model.User;
 import com.codegym.kanflow.repository.CardListRepository;
 import com.codegym.kanflow.repository.CardRepository;
+import com.codegym.kanflow.repository.LabelRepository;
 import com.codegym.kanflow.repository.UserRepository;
 import com.codegym.kanflow.service.ICardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,10 @@ public class CardService implements ICardService {
 
     @Autowired
     private CardListRepository cardListRepository;
+
+    @Autowired
+    private LabelRepository labelRepository;
+
 
     @Override
     public Card save(Card card) {
@@ -143,4 +149,22 @@ public class CardService implements ICardService {
         return cardRepository.findAllByAssignee(user);
     }
 
+    @Override
+    @Transactional
+    public void assignLabel(Long cardId, Long labelId) {
+        Card card = findByIdWithDetails(cardId);
+        Label label = labelRepository.findById(labelId).orElse(null);
+        if (card != null && label != null) {
+            card.getLabels().add(label);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void unassignLabel(Long cardId, Long labelId) {
+        Card card = findByIdWithDetails(cardId);
+        if (card != null) {
+            card.getLabels().removeIf(label -> label.getId().equals(labelId));
+        }
+    }
 }

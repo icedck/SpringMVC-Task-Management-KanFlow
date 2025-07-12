@@ -35,6 +35,14 @@ public class Card {
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Attachment> attachments = new HashSet<>();
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "card_labels",
+            joinColumns = @JoinColumn(name = "card_id"),
+            inverseJoinColumns = @JoinColumn(name = "label_id")
+    )
+    private Set<Label> labels = new HashSet<>();
+
     // Getters and Setters...
     public Long getId() {
         return id;
@@ -92,4 +100,10 @@ public class Card {
         this.attachments = attachments;
     }
 
+    public Set<Label> getLabels() {
+        return labels;
+    }
+    public void setLabels(Set<Label> labels) {
+        this.labels = labels;
+    }
 }

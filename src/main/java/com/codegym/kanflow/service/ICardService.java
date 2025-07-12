@@ -25,4 +25,7 @@ public interface ICardService {
 
     List<Card> findAllByAssignee(User user);
 
+    void assignLabel(Long cardId, Long labelId);
+
+    void unassignLabel(Long cardId, Long labelId);
 }

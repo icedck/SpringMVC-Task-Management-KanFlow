@@ -97,6 +97,7 @@
             th:each="card : ${list.cards}"
             th:attr="data-card-id=${card.id}"
           >
+            <div class="card-labels"></div>
             <span th:text="${card.title}">Card Title</span>
             <button class="card-delete-btn">×</button>
             <div class="card-assignees">
@@ -168,6 +169,12 @@
               font-family: inherit;
             "
           ></textarea>
+          <div class="labels-section">
+            <p><strong><i class="fas fa-tags"></i> Labels</strong></p>
+            <ul id="modal-label-list" class="label-list">
+              <!-- Các nhãn sẽ được JS chèn vào đây -->
+            </ul>
+          </div>
           <div class="assignees-section">
             <p><strong>Members</strong></p>
             <ul id="modal-member-list" class="member-list"></ul>

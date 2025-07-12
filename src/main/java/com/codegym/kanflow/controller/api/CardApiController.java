@@ -1,9 +1,6 @@
 package com.codegym.kanflow.controller.api;
 
-import com.codegym.kanflow.dto.AttachmentDto;
-import com.codegym.kanflow.dto.CardDto;
-import com.codegym.kanflow.dto.CardMoveDto;
-import com.codegym.kanflow.dto.UserDto;
+import com.codegym.kanflow.dto.*;
 import com.codegym.kanflow.model.Card;
 import com.codegym.kanflow.model.CardList;
 import com.codegym.kanflow.service.IBoardService;
@@ -18,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -62,7 +60,19 @@ public class CardApiController {
                 .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEmail()))
                 .collect(Collectors.toList());
 
-        CardDto responseDto = new CardDto(card.getId(), card.getTitle(), card.getDescription(), card.getPosition(), assigneeDtos);
+        // === BẠN ĐANG THIẾU ĐOẠN NÀY ===
+        Set<LabelDto> labelDtos = card.getLabels().stream()
+                .map(label -> {
+                    LabelDto dto = new LabelDto();
+                    dto.setId(label.getId());
+                    dto.setName(label.getName());
+                    dto.setColor(label.getColor());
+                    return dto;
+                })
+                .collect(Collectors.toSet());
+
+        // Sử dụng constructor mới của CardDto
+        CardDto responseDto = new CardDto(card.getId(), card.getTitle(), card.getDescription(), card.getPosition(), assigneeDtos, labelDtos);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
@@ -81,7 +91,20 @@ public class CardApiController {
         List<UserDto> assigneeDtos = updatedCard.getAssignees().stream()
                 .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEmail()))
                 .collect(Collectors.toList());
-        CardDto responseDto = new CardDto(updatedCard.getId(), updatedCard.getTitle(), updatedCard.getDescription(), updatedCard.getPosition(), assigneeDtos);
+
+        // === BẠN ĐANG THIẾU ĐOẠN NÀY ===
+        Set<LabelDto> labelDtos = updatedCard.getLabels().stream()
+                .map(label -> {
+                    LabelDto dto = new LabelDto();
+                    dto.setId(label.getId());
+                    dto.setName(label.getName());
+                    dto.setColor(label.getColor());
+                    return dto;
+                })
+                .collect(Collectors.toSet());
+
+        // Sử dụng constructor mới của CardDto
+        CardDto responseDto = new CardDto(updatedCard.getId(), updatedCard.getTitle(), updatedCard.getDescription(), updatedCard.getPosition(), assigneeDtos, labelDtos);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
@@ -172,5 +195,31 @@ public class CardApiController {
                 .collect(Collectors.toList());
 
         return new ResponseEntity<>(attachmentDtos, HttpStatus.OK);
+    }
+
+    @PostMapping("/{cardId}/labels/{labelId}")
+    public ResponseEntity<?> assignLabel(@PathVariable Long cardId, @PathVariable Long labelId, Principal principal) {
+        Card card = cardService.findByIdWithDetails(cardId);
+        if (card == null) {
+            return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
+        }
+        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
+            return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
+        }
+        cardService.assignLabel(cardId, labelId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{cardId}/labels/{labelId}")
+    public ResponseEntity<?> unassignLabel(@PathVariable Long cardId, @PathVariable Long labelId, Principal principal) {
+        Card card = cardService.findByIdWithDetails(cardId);
+        if (card == null) {
+            return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
+        }
+        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
+            return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
+        }
+        cardService.unassignLabel(cardId, labelId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

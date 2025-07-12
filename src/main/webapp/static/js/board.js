@@ -1,8 +1,21 @@
 $(document).ready(function () {
   const boardId = $("body").data("board-id");
+  let allLabels = [];
 
   // DÒNG DEBUG: In giá trị boardId ra console ngay khi trang được tải.
   console.log("Board ID đã được đọc từ thẻ body:", boardId);
+
+  function fetchAllLabels() {
+    $.ajax({
+      type: "GET",
+      url: "/api/labels",
+      success: function (labels) {
+        allLabels = labels;
+      },
+      error: function() { console.error("Could not load labels."); }
+    });
+  }
+  fetchAllLabels();
 
   function createListHtml(listDto) {
     return `
@@ -23,24 +36,22 @@ $(document).ready(function () {
   }
 
   function createCardHtml(cardDto) {
-    let assigneesHtml = "";
-    if (cardDto.assignees && cardDto.assignees.length > 0) {
-      assigneesHtml = cardDto.assignees
-        .map(
-          (assignee) =>
-            `<div class="member-avatar" title="${
-              assignee.username
-            }">${assignee.username.substring(0, 1).toUpperCase()}</div>`
-        )
-        .join("");
-    }
+    let assigneesHtml = cardDto.assignees?.map(assignee =>
+        `<div class="member-avatar" title="${assignee.username}">${assignee.username.substring(0, 1).toUpperCase()}</div>`
+    ).join("") || "";
+
+    let labelsHtml = cardDto.labels?.map(label =>
+        `<div class="card-label" style="background-color: ${label.color};" title="${label.name}">${label.name}</div>`
+    ).join('') || "";
+
     return `
-            <div class="card" data-card-id="${cardDto.id}">
-                <span>${cardDto.title}</span>
-                <button class="card-delete-btn">×</button>
-                <div class="card-assignees">${assigneesHtml}</div>
-            </div>
-        `;
+        <div class="card" data-card-id="${cardDto.id}">
+            <div class="card-labels">${labelsHtml}</div>
+            <span>${cardDto.title}</span>
+            <button class="card-delete-btn">×</button>
+            <div class="card-assignees">${assigneesHtml}</div>
+        </div>
+    `;
   }
 
   function updateCardAssigneesView(cardId) {
@@ -48,18 +59,9 @@ $(document).ready(function () {
       type: "GET",
       url: `/api/cards/${cardId}`,
       success: function (cardDto) {
-        let cardElement = $(`.card[data-card-id="${cardId}"]`);
-        let assigneesContainer = cardElement.find(".card-assignees");
-        assigneesContainer.empty();
-
-        if (cardDto.assignees && cardDto.assignees.length > 0) {
-          cardDto.assignees.forEach(function (assignee) {
-            let avatar = `<div class="member-avatar" title="${
-              assignee.username
-            }">${assignee.username.substring(0, 1).toUpperCase()}</div>`;
-            assigneesContainer.append(avatar);
-          });
-        }
+        // Thay vì chỉ sửa, ta render lại cả card cho đơn giản và chính xác
+        const newCardHtml = createCardHtml(cardDto);
+        $(`.card[data-card-id="${cardId}"]`).replaceWith(newCardHtml);
       },
     });
   }
@@ -316,6 +318,7 @@ $(document).ready(function () {
         });
 
         populateAttachmentList(attachments);
+        populateLabelsInModal(cardDto.labels);
 
         $("#card-modal").show();
       })
@@ -569,6 +572,59 @@ $(document).ready(function () {
       error: function (xhr) {
         alert("Error deleting file: " + xhr.responseText);
       },
+    });
+  });
+
+  function updateCardLabelsView(cardId, labels) {
+    const cardElement = $(`.card[data-card-id="${cardId}"]`);
+    const labelsContainer = cardElement.find('.card-labels');
+    labelsContainer.empty();
+    if (labels && labels.length > 0) {
+      const labelsHtml = labels.map(label =>
+          `<div class="card-label" style="background-color: ${label.color};" title="${label.name}">${label.name}</div>`
+      ).join('');
+      labelsContainer.html(labelsHtml);
+    }
+  }
+
+  function populateLabelsInModal(assignedLabels) {
+    const listElement = $("#modal-label-list");
+    listElement.empty();
+    const assignedLabelIds = new Set(assignedLabels.map(l => l.id));
+
+    allLabels.forEach(label => {
+      const isSelected = assignedLabelIds.has(label.id);
+      const itemHtml = `
+            <li class="label-list-item ${isSelected ? 'selected' : ''}" 
+                style="background-color: ${label.color};"
+                data-label-id="${label.id}">
+                <span>${label.name}</span>
+                <i class="fas fa-check"></i>
+            </li>
+        `;
+      listElement.append(itemHtml);
+    });
+  }
+
+  $(document).on('click', '.label-list-item', function() {
+    const labelItem = $(this);
+    const cardId = $("#card-modal").data("current-card-id");
+    const labelId = labelItem.data("label-id");
+    const isSelected = labelItem.hasClass('selected');
+
+    const apiUrl = `/api/cards/${cardId}/labels/${labelId}`;
+    const apiType = isSelected ? "DELETE" : "POST";
+
+    $.ajax({
+      type: apiType,
+      url: apiUrl,
+      success: function() {
+        labelItem.toggleClass('selected');
+        $.get(`/api/cards/${cardId}`, function(cardDto) {
+          updateCardLabelsView(cardId, cardDto.labels);
+        });
+      },
+      error: function() { alert('Failed to update label.'); }
     });
   });
 });
