@@ -78,17 +78,16 @@
             color: #fff;
         }
 
-        /* === CSS CHO USER DROPDOWN === */
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 15px; /* Khoảng cách giữa nút Create và menu User */
+            gap: 15px;
         }
 
         .user-menu {
             position: relative;
             display: inline-block;
-            padding-bottom: 10px; /* Tạo cầu nối vô hình */
+            padding-bottom: 10px;
         }
 
         .user-avatar {
@@ -104,7 +103,7 @@
             font-weight: 600;
             cursor: pointer;
             border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s;
         }
 
@@ -118,11 +117,10 @@
             right: 0;
             background-color: #f9f9f9;
             min-width: 220px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
             z-index: 1;
             border-radius: 10px;
             overflow: hidden;
-            /* margin-top: 10px; Bỏ margin này đi */
         }
 
         .dropdown-content .dropdown-header {
@@ -134,7 +132,7 @@
         .dropdown-content .dropdown-header strong {
             color: #343a40;
             font-size: 1.1rem;
-            display: block; /* Cho username xuống dòng */
+            display: block;
             margin-bottom: 4px;
         }
 
@@ -142,7 +140,7 @@
             font-size: 0.9rem;
             color: #6c757d;
             margin: 0;
-            word-break: break-all; /* Để email dài không làm vỡ layout */
+            word-break: break-all;
         }
 
         .dropdown-content a, .dropdown-content button {
@@ -163,6 +161,7 @@
         .dropdown-content a:hover, .dropdown-content button:hover {
             background-color: #e2e6ea;
         }
+
         .dropdown-content .dropdown-divider {
             height: 1px;
             margin: 0;
@@ -173,8 +172,6 @@
         .user-menu:hover .dropdown-content {
             display: block;
         }
-        /* ============================= */
-
 
         .section {
             margin-bottom: 40px;
@@ -390,7 +387,6 @@
                 <i class="fas fa-plus"></i> Create New Board
             </a>
 
-            <!-- USER DROPDOWN MENU -->
             <div class="user-menu" th:if="${currentUser != null}">
                 <div class="user-avatar" th:text="${#strings.substring(currentUser.username, 0, 1).toUpperCase()}">
                     U
@@ -401,18 +397,14 @@
                         <p th:text="${currentUser.email}">user.email@example.com</p>
                     </div>
 
-                    <!-- === PHẦN THÊM MỚI === -->
-                    <!-- Chỉ hiển thị khối này nếu user có vai trò 'ADMIN' -->
                     <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
                         <div class="dropdown-divider"></div>
                         <a th:href="@{/admin/users}">
                             <i class="fa-solid fa-users-gear"></i> Manage Users
                         </a>
                     </div>
-                    <!-- ======================= -->
 
                     <div class="dropdown-divider"></div>
-                    <!-- Nút Đăng xuất -->
                     <button type="submit" form="logoutForm">
                         <i class="fas fa-sign-out-alt"></i> Sign out
                     </button>
@@ -422,10 +414,8 @@
 
     </div>
 
-    <!-- Owned Boards Section -->
     <div class="section">
         <h2><i class="fas fa-crown"></i> Owned Boards</h2>
-        <!-- ... nội dung không đổi ... -->
         <div th:if="${ownedBoards.isEmpty()}" class="empty-state">
             <i
                     class="fas fa-folder-open"
@@ -482,10 +472,8 @@
         </div>
     </div>
 
-    <!-- Joined Boards Section -->
     <div class="section">
         <h2><i class="fas fa-users"></i> Joined Boards</h2>
-        <!-- ... nội dung không đổi ... -->
         <div th:if="${joinedBoards.isEmpty()}" class="empty-state">
             <i
                     class="fas fa-handshake"
@@ -518,21 +506,17 @@
     </div>
 </div>
 
-<!-- Form đăng xuất ẩn, đặt ở cuối trang -->
 <form id="logoutForm" th:action="@{/logout}" method="post" style="display: none;"></form>
 
 
 <script>
-    // Add smooth scrolling and enhance UX
     document.addEventListener("DOMContentLoaded", function () {
-        // Add loading animation
         const cards = document.querySelectorAll(".board-card");
         cards.forEach((card, index) => {
             card.style.animationDelay = `${index * 0.1}s`;
             card.classList.add("fade-in");
         });
 
-        // Add hover effects for better interactivity
         cards.forEach((card) => {
             card.addEventListener("mouseenter", function () {
                 this.style.transform = "translateY(-5px) scale(1.02)";

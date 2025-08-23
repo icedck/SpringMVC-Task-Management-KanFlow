@@ -23,8 +23,7 @@ import java.util.Set;
 public class UserService implements IUserService {
     @Autowired
     private UserRepository userRepository;
-    //Chúng ta đã tiêm PasswordEncoder vào UserService và sử dụng nó để mã hóa
-// mật khẩu của người dùng ngay trước khi lưu vào CSDL.
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -51,10 +50,8 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void save(User user) { // <-- THÊM PHƯƠNG THỨC NÀY
-        // Mã hóa mật khẩu trước khi lưu
+    public void save(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        // Tự động gán vai trò ROLE_USER cho người dùng mới
         Role userRole = roleRepository.findByName("ROLE_USER");
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
@@ -68,38 +65,28 @@ public class UserService implements IUserService {
     }
 
     @Override
-    @Transactional // Quan trọng
+    @Transactional
     public void updateUser(User userFromForm) {
-        // Lấy user gốc từ DB
         User existingUser = findByIdWithRoles(userFromForm.getId());
         if (existingUser != null) {
-            // Cập nhật các trường cho phép
             existingUser.setEmail(userFromForm.getEmail());
-            // Cập nhật danh sách vai trò
             existingUser.setRoles(userFromForm.getRoles());
             userRepository.save(existingUser);
         }
     }
 
     @Override
-    @Transactional // Transaction là bắt buộc!
+    @Transactional
     public void deleteById(Long id) {
-        User userToDelete = this.findById(id); // findById là đủ ở đây
+        User userToDelete = this.findById(id);
 
         if (userToDelete != null) {
-            // === BƯỚC 1: Dọn dẹp các mối quan hệ phụ thuộc ===
-
-            // 1.1 Dọn dẹp mối quan hệ Assignee trong các Card
             List<Card> assignedCards = cardService.findAllByAssignee(userToDelete);
             for (Card card : assignedCards) {
-                // Xóa user này khỏi danh sách assignees của card
                 card.getAssignees().remove(userToDelete);
-                // Lưu lại card đã cập nhật
                 cardService.save(card);
             }
 
-            // 1.2 Dọn dẹp mối quan hệ Member trong các Board
-            // Cần tải lại user với sharedBoards để dọn dẹp
             User userWithSharedBoards = userRepository.findById(id).orElse(null); // Tải lại để có transaction
             if(userWithSharedBoards != null) {
                 Hibernate.initialize(userWithSharedBoards.getSharedBoards());
@@ -108,16 +95,12 @@ public class UserService implements IUserService {
                 }
             }
 
-            // 1.3 Dọn dẹp mối quan hệ Roles
-            // Tải lại user với roles để dọn dẹp
             User userWithRoles = userRepository.findById(id).orElse(null);
             if(userWithRoles != null) {
                 Hibernate.initialize(userWithRoles.getRoles());
                 userWithRoles.getRoles().clear();
             }
 
-            // === BƯỚC 2: Kiểm tra các mối quan hệ sở hữu ===
-            // Tải lại user với boards để kiểm tra
             User userWithOwnerBoards = userRepository.findById(id).orElse(null);
             if(userWithOwnerBoards != null) {
                 Hibernate.initialize(userWithOwnerBoards.getBoards());
@@ -128,8 +111,6 @@ public class UserService implements IUserService {
                 }
             }
 
-            // === BƯỚC 3: Xóa User ===
-            // Sau khi tất cả các mối quan hệ đã được dọn dẹp, tiến hành xóa User
             userRepository.delete(userToDelete);
         }
     }

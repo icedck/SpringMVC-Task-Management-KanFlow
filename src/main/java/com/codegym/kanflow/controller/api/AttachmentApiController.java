@@ -18,15 +18,18 @@ import java.security.Principal;
 @RequestMapping("/api/attachments")
 public class AttachmentApiController {
 
-    @Autowired private IAttachmentService attachmentService;
-    @Autowired private ICardService cardService;
-    @Autowired private IBoardService boardService;
+    @Autowired
+    private IAttachmentService attachmentService;
+    @Autowired
+    private ICardService cardService;
+    @Autowired
+    private IBoardService boardService;
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file,
                                         @RequestParam("cardId") Long cardId,
                                         Principal principal) {
-        // Kiểm tra quyền
+
         Card card = cardService.findByIdWithDetails(cardId);
         if (card == null) return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
         if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
@@ -47,7 +50,6 @@ public class AttachmentApiController {
 
     @DeleteMapping("/{attachmentId}")
     public ResponseEntity<Void> deleteFile(@PathVariable Long attachmentId, Principal principal) {
-        // Tạm thời chưa kiểm tra quyền xóa attachment, bạn có thể thêm sau
         attachmentService.deleteFile(attachmentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

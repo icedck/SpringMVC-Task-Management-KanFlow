@@ -10,7 +10,7 @@ import org.springframework.security.access.AccessDeniedException;
 
 import javax.servlet.http.HttpServletRequest;
 
-@ControllerAdvice // Annotation báo cho Spring biết đây là một trình xử lý ngoại lệ toàn cục
+@ControllerAdvice
 public class GlobalExceptionHandler {
 
     /**
@@ -31,12 +31,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public Object handleGenericException(HttpServletRequest req, Exception ex) {
-        // In lỗi ra console để dev có thể debug
         ex.printStackTrace();
 
-        // Nếu request là một lời gọi API (URL bắt đầu bằng /api/)
         if (req.getRequestURI().startsWith("/api/")) {
-            // Trả về một đối tượng JSON với thông báo lỗi
             ErrorResponse error = new ErrorResponse(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "An unexpected error occurred.",
@@ -44,15 +41,12 @@ public class GlobalExceptionHandler {
             );
             return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        // Nếu là request đến trang web thông thường, trả về trang lỗi 500
         ModelAndView modelAndView = new ModelAndView("error/500");
         modelAndView.addObject("message", "An unexpected error occurred. Please try again later.");
         modelAndView.addObject("error", ex.getClass().getSimpleName());
         return modelAndView;
     }
 
-    // Một lớp nội bộ để biểu diễn cấu trúc lỗi JSON cho API
     private static class ErrorResponse {
         public int status;
         public String message;

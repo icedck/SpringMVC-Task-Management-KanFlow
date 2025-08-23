@@ -6,21 +6,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-@Component // Rất quan trọng! Để Spring có thể tìm thấy và sử dụng nó
+@Component
 public class StringToRoleConverter implements Converter<String, Role> {
 
     @Autowired
-    private IRoleService roleService; // Dùng service để tìm Role từ DB
+    private IRoleService roleService;
 
     @Override
     public Role convert(String source) {
-        // source chính là chuỗi ID được gửi từ form, ví dụ "1", "2"
         try {
             Long roleId = Long.parseLong(source);
-            // Gọi service để tìm đối tượng Role tương ứng với ID
-            return roleService.findById(roleId); // Bạn cần thêm phương thức này vào service
+            return roleService.findById(roleId);
         } catch (NumberFormatException e) {
-            // Xử lý nếu source không phải là một số
             return null;
         }
     }

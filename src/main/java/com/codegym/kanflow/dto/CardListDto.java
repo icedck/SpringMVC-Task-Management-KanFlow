@@ -1,12 +1,10 @@
 package com.codegym.kanflow.dto;
 
-// Lớp này dùng để truyền dữ liệu CardList dưới dạng JSON
 public class CardListDto {
     private Long id;
     private String title;
     private int position;
 
-    // Constructors
     public CardListDto() {
     }
 
@@ -16,7 +14,6 @@ public class CardListDto {
         this.position = position;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getTitle() { return title; }

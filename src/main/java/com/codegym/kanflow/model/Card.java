@@ -17,13 +17,13 @@ public class Card {
     @Lob // Dùng cho các chuỗi dài như mô tả
     private String description;
 
-    private int position; // Dùng để sắp xếp thứ tự các card
+    private int position;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_list_id")
     private CardList cardList;
 
-    @ManyToMany(fetch = FetchType.LAZY) // Bỏ cascade ở đây như đã thảo luận trước
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "card_assignees",
             joinColumns = @JoinColumn(name = "card_id"),
@@ -31,7 +31,6 @@ public class Card {
     )
     private Set<User> assignees = new HashSet<>(); // Sửa thành Set
 
-    // === SỬA LẠI TỪ LIST SANG SET ===
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Attachment> attachments = new HashSet<>();
 
@@ -43,7 +42,6 @@ public class Card {
     )
     private Set<Label> labels = new HashSet<>();
 
-    // Getters and Setters...
     public Long getId() {
         return id;
     }
@@ -103,6 +101,7 @@ public class Card {
     public Set<Label> getLabels() {
         return labels;
     }
+
     public void setLabels(Set<Label> labels) {
         this.labels = labels;
     }

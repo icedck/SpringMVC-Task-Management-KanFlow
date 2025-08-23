@@ -18,13 +18,8 @@ public class AuthController {
     @Autowired
     private IUserService userService;
 
-    /**
-     * Phương thức này xử lý các request GET đến "/login".
-     * Nó chỉ đơn giản là trả về tên của file view để hiển thị.
-     */
     @GetMapping("/login")
     public String showLoginPage() {
-        // Trả về đường dẫn đến file view: "/WEB-INF/views/auth/login.html"
         return "auth/login";
     }
 
@@ -35,28 +30,20 @@ public class AuthController {
         return modelAndView;
     }
 
-    // PHƯƠNG THỨC XỬ LÝ VIỆC ĐĂNG KÝ (MỚI)
     @PostMapping("/register")
-    // Thêm @Valid và BindingResult
     public String registerUser(@Valid @ModelAttribute("user") User user,
                                BindingResult bindingResult,
                                Model model) {
 
-        // Kiểm tra xem username đã tồn tại chưa
         if (userService.findByUsername(user.getUsername()) != null) {
-            // Thêm lỗi vào BindingResult
             bindingResult.rejectValue("username", "error.user", "Username already exists!");
         }
-        // Kiểm tra xem email đã tồn tại chưa
         if (userService.findByEmail(user.getEmail()) != null) {
             bindingResult.rejectValue("email", "error.user", "Email already exists!");
         }
-        // Nếu có lỗi validation (từ annotation hoặc từ code)
         if (bindingResult.hasErrors()) {
-            // Không cần thêm attribute lỗi vào model nữa, Thymeleaf sẽ tự lấy từ BindingResult
-            return "auth/register"; // Quay lại trang đăng ký
+            return "auth/register";
         }
-        // Nếu không có lỗi, lưu người dùng mới
         userService.save(user);
         return "redirect:/login?register_success";
     }

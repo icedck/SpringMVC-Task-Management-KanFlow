@@ -11,10 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CardRepository extends JpaRepository<Card, Long> {
-    /**
-     * Tìm tất cả các Card thuộc về một CardList và sắp xếp chúng theo vị trí tăng dần.
-     */
-    List<Card> findByCardListOrderByPositionAsc(CardList cardList); // <-- THÊM DÒNG NÀY
+//    List<Card> findByCardListOrderByPositionAsc(CardList cardList);
 
     @Query("SELECT DISTINCT c FROM Card c " +
             "LEFT JOIN FETCH c.cardList cl " +

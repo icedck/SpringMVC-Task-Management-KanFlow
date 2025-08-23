@@ -24,7 +24,6 @@ import org.thymeleaf.templatemode.TemplateMode;
 @ComponentScan("com.codegym.kanflow.controller")
 public class WebConfig implements WebMvcConfigurer, ApplicationContextAware {
 
-    // Inject giá trị từ file upload_file.properties
     @Value("${file-upload}")
     private String fileUpload;
 
@@ -72,11 +71,9 @@ public class WebConfig implements WebMvcConfigurer, ApplicationContextAware {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Cấu hình cho file static (css, js)
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("/static/");
 
-        // Cấu hình cho file đính kèm đã upload
         registry.addResourceHandler("/attachments/**")
                 .addResourceLocations("file:" + fileUpload);
     }

@@ -10,13 +10,12 @@ public class Label {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name; // Ví dụ: "Urgent", "Feature", "Bug"
-    private String color; // Ví dụ: "#ef4444" (mã màu hex)
+    private String name;
+    private String color;
 
     @ManyToMany(mappedBy = "labels")
     private Set<Card> cards;
 
-    // Getters and Setters...
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }

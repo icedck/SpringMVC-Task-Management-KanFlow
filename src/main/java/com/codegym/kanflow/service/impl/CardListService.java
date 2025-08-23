@@ -6,14 +6,13 @@ import com.codegym.kanflow.service.ICardListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
-@Service // Đánh dấu đây là một Spring Bean thuộc tầng Service
-public class CardListService implements ICardListService { // Triển khai interface
+@Service
+public class CardListService implements ICardListService {
 
     @Autowired
-    private CardListRepository cardListRepository; // Tiêm Repository tương ứng
+    private CardListRepository cardListRepository;
 
     @Override
     public CardList save(CardList cardList) {
@@ -58,7 +57,6 @@ public class CardListService implements ICardListService { // Triển khai inter
             Long listId = listIds.get(i);
             int newPosition = i;
 
-            // Chỉ cần findById là đủ, vì quyền đã được kiểm tra ở Controller
             cardListRepository.findById(listId).ifPresent(list -> {
                 list.setPosition(newPosition);
                 cardListRepository.save(list);

@@ -3,6 +3,9 @@ package com.codegym.kanflow.controller.api;
 import com.codegym.kanflow.dto.*;
 import com.codegym.kanflow.model.Card;
 import com.codegym.kanflow.model.CardList;
+import com.codegym.kanflow.model.Label;
+import com.codegym.kanflow.model.User;
+import com.codegym.kanflow.model.Attachment;
 import com.codegym.kanflow.service.IBoardService;
 import com.codegym.kanflow.service.ICardListService;
 import com.codegym.kanflow.service.ICardService;
@@ -14,9 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cards")
@@ -31,7 +34,6 @@ public class CardApiController {
 
     @PostMapping
     public ResponseEntity<?> createCard(@RequestBody CardDto cardDto, @RequestParam Long listId, Principal principal) {
-        // Dùng findByIdWithBoard để lấy luôn board, tránh Lazy
         CardList cardList = cardListService.findByIdWithBoard(listId);
         if (cardList == null) {
             return new ResponseEntity<>("List not found", HttpStatus.NOT_FOUND);
@@ -43,7 +45,7 @@ public class CardApiController {
         newCard.setTitle(cardDto.getTitle());
         newCard.setCardList(cardList);
         Card savedCard = cardService.save(newCard);
-        CardDto responseDto = new CardDto(savedCard.getId(), savedCard.getTitle(), null, 0, new ArrayList<>());
+        CardDto responseDto = new CardDto(savedCard.getId(), savedCard.getTitle(), null, 0, new ArrayList<>(), new HashSet<>());
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
@@ -56,22 +58,21 @@ public class CardApiController {
         if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
             throw new AccessDeniedException("You do not have permission to view this card.");
         }
-        List<UserDto> assigneeDtos = card.getAssignees().stream()
-                .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEmail()))
-                .collect(Collectors.toList());
 
-        // === BẠN ĐANG THIẾU ĐOẠN NÀY ===
-        Set<LabelDto> labelDtos = card.getLabels().stream()
-                .map(label -> {
-                    LabelDto dto = new LabelDto();
-                    dto.setId(label.getId());
-                    dto.setName(label.getName());
-                    dto.setColor(label.getColor());
-                    return dto;
-                })
-                .collect(Collectors.toSet());
+        List<UserDto> assigneeDtos = new ArrayList<>();
+        for (User user : card.getAssignees()) {
+            assigneeDtos.add(new UserDto(user.getId(), user.getUsername(), user.getEmail()));
+        }
 
-        // Sử dụng constructor mới của CardDto
+        Set<LabelDto> labelDtos = new HashSet<>();
+        for (Label label : card.getLabels()) {
+            LabelDto dto = new LabelDto();
+            dto.setId(label.getId());
+            dto.setName(label.getName());
+            dto.setColor(label.getColor());
+            labelDtos.add(dto);
+        }
+
         CardDto responseDto = new CardDto(card.getId(), card.getTitle(), card.getDescription(), card.getPosition(), assigneeDtos, labelDtos);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -88,22 +89,21 @@ public class CardApiController {
         card.setTitle(cardDto.getTitle());
         card.setDescription(cardDto.getDescription());
         Card updatedCard = cardService.save(card);
-        List<UserDto> assigneeDtos = updatedCard.getAssignees().stream()
-                .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEmail()))
-                .collect(Collectors.toList());
 
-        // === BẠN ĐANG THIẾU ĐOẠN NÀY ===
-        Set<LabelDto> labelDtos = updatedCard.getLabels().stream()
-                .map(label -> {
-                    LabelDto dto = new LabelDto();
-                    dto.setId(label.getId());
-                    dto.setName(label.getName());
-                    dto.setColor(label.getColor());
-                    return dto;
-                })
-                .collect(Collectors.toSet());
+        List<UserDto> assigneeDtos = new ArrayList<>();
+        for (User user : updatedCard.getAssignees()) {
+            assigneeDtos.add(new UserDto(user.getId(), user.getUsername(), user.getEmail()));
+        }
 
-        // Sử dụng constructor mới của CardDto
+        Set<LabelDto> labelDtos = new HashSet<>();
+        for (Label label : updatedCard.getLabels()) {
+            LabelDto dto = new LabelDto();
+            dto.setId(label.getId());
+            dto.setName(label.getName());
+            dto.setColor(label.getColor());
+            labelDtos.add(dto);
+        }
+
         CardDto responseDto = new CardDto(updatedCard.getId(), updatedCard.getTitle(), updatedCard.getDescription(), updatedCard.getPosition(), assigneeDtos, labelDtos);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -182,17 +182,14 @@ public class CardApiController {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
 
-        // Chuyển đổi từ Entity sang DTO
-        List<AttachmentDto> attachmentDtos = card.getAttachments().stream()
-                .map(att -> {
-                    AttachmentDto dto = new AttachmentDto();
-                    dto.setId(att.getId());
-                    dto.setFileName(att.getFileName());
-                    // Tạo URL để truy cập file
-                    dto.setUrl("/attachments/" + att.getStoredFileName());
-                    return dto;
-                })
-                .collect(Collectors.toList());
+        List<AttachmentDto> attachmentDtos = new ArrayList<>();
+        for (Attachment att : card.getAttachments()) {
+            AttachmentDto dto = new AttachmentDto();
+            dto.setId(att.getId());
+            dto.setFileName(att.getFileName());
+            dto.setUrl("/attachments/" + att.getStoredFileName());
+            attachmentDtos.add(dto);
+        }
 
         return new ResponseEntity<>(attachmentDtos, HttpStatus.OK);
     }

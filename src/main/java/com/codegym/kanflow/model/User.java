@@ -27,8 +27,6 @@ public class User {
     @Email(message = "Please provide a valid email address")
     private String email;
 
-    // Quan hệ 1-Nhiều: Một User có thể sở hữu nhiều Board.
-    // 'mappedBy = "owner"' chỉ ra rằng mối quan hệ này được quản lý bởi trường 'owner' trong lớp Board.
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
     private List<Board> boards;
 
@@ -41,10 +39,8 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-//    @NotEmpty(message = "User must have at least one role.")
     private Set<Role> roles = new HashSet<>();
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

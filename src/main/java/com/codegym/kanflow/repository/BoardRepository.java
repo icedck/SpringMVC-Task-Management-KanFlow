@@ -12,22 +12,13 @@ import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long> {
-    /**
-     * Tìm một Board theo ID và lấy tất cả các CardList và Card liên quan
-     * trong cùng một câu truy vấn để tránh LazyInitializationException.
-     *
-     * @param id ID của Board cần tìm.
-     * @return một Optional chứa Board với đầy đủ dữ liệu.
-     */
-    // Sửa lại câu query trong BoardRepository
-    @Query("SELECT b FROM Board b LEFT JOIN FETCH b.owner LEFT JOIN FETCH b.members WHERE b.id = :id")
-    Optional<Board> findByIdWithDetails(@Param("id") Long id);
-
-    List<Board> findAllByOwner(User owner);
-
-    // Tìm tất cả các board mà user là owner hoặc là thành viên
-    @Query("SELECT b FROM Board b WHERE b.owner = :user OR :user MEMBER OF b.members")
-    List<Board> findByOwnerOrMember(@Param("user") User user);
+//    @Query("SELECT b FROM Board b LEFT JOIN FETCH b.owner LEFT JOIN FETCH b.members WHERE b.id = :id")
+//    Optional<Board> findByIdWithDetails(@Param("id") Long id);
+//
+//    List<Board> findAllByOwner(User owner);
+//
+//    @Query("SELECT b FROM Board b WHERE b.owner = :user OR :user MEMBER OF b.members")
+//    List<Board> findByOwnerOrMember(@Param("user") User user);
 
     @Query("SELECT DISTINCT b FROM Board b WHERE b.owner = :user OR :user MEMBER OF b.members")
     List<Board> findBoardsByUser(@Param("user") User user);
@@ -35,8 +26,6 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     @Query("SELECT b FROM Board b JOIN FETCH b.owner WHERE b.id = :id")
     Optional<Board> findByIdWithOwner(@Param("id") Long id);
 
-    // Câu query này sẽ lấy Board, Owner, và Members.
-    // Việc tải CardList, Card, Assignees sẽ được xử lý trong service.
     @Query("SELECT DISTINCT b FROM Board b LEFT JOIN FETCH b.owner LEFT JOIN FETCH b.members WHERE b.id = :id")
     Optional<Board> findByIdWithMembersAndOwner(@Param("id") Long id);
 }

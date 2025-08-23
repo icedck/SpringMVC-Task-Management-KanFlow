@@ -51,7 +51,7 @@ public class AttachmentService implements IAttachmentService {
         try {
             fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
         } catch (Exception e) {
-            // Xử lý trường hợp file không có đuôi
+            e.printStackTrace();
         }
         String storedFileName = UUID.randomUUID().toString() + fileExtension;
 

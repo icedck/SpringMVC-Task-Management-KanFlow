@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/labels")
@@ -22,13 +22,18 @@ public class LabelApiController {
     @GetMapping
     public ResponseEntity<List<LabelDto>> getAllLabels() {
         List<Label> labels = labelService.findAll();
-        List<LabelDto> dtos = labels.stream().map(label -> {
+
+        List<LabelDto> dtos = new ArrayList<>();
+
+        for (Label label : labels) {
             LabelDto dto = new LabelDto();
             dto.setId(label.getId());
             dto.setName(label.getName());
             dto.setColor(label.getColor());
-            return dto;
-        }).collect(Collectors.toList());
+
+            dtos.add(dto);
+        }
+
         return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 }

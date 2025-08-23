@@ -1,26 +1,26 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8"/>
     <title th:text="${board.title} + ' | Kanflow'"></title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <link
-      rel="stylesheet"
-      href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+            rel="stylesheet"
+            href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
     />
     <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
     />
-    <link rel="stylesheet" th:href="@{/static/css/board.css}" />
-  </head>
-  <body th:data-board-id="${board.id}">
-    <div class="board-header">
-      <a
-        href="/boards"
-        class="back-btn"
-        style="
+    <link rel="stylesheet" th:href="@{/static/css/board.css}"/>
+</head>
+<body th:data-board-id="${board.id}">
+<div class="board-header">
+    <a
+            href="/boards"
+            class="back-btn"
+            style="
           text-decoration: none;
           margin-right: 18px;
           display: inline-block;
@@ -33,120 +33,120 @@
           border: 1.5px solid #e0e4ea;
           font-weight: 600;
         "
-        >← Back</a
-      >
-      <div class="header-main-content">
+    >← Back</a
+    >
+    <div class="header-main-content">
         <h1 th:text="${board.title}">Board Title</h1>
         <div class="board-members-section">
-          <div
-            th:each="member : ${board.members}"
-            class="member-avatar-wrapper"
-          >
-            <div class="member-avatar" th:title="${member.username}">
-              <span
-                th:text="${#strings.substring(member.username, 0, 1).toUpperCase()}"
-              ></span>
-            </div>
-            <button
-              class="remove-member-btn"
-              th:if="${#authentication.name == board.owner.username and member.id != board.owner.id}"
-              th:data-user-id="${member.id}"
-              title="Remove member"
+            <div
+                    th:each="member : ${board.members}"
+                    class="member-avatar-wrapper"
             >
-              <i class="fa-solid fa-minus"></i>
-            </button>
-          </div>
+                <div class="member-avatar" th:title="${member.username}">
+              <span
+                      th:text="${#strings.substring(member.username, 0, 1).toUpperCase()}"
+              ></span>
+                </div>
+                <button
+                        class="remove-member-btn"
+                        th:if="${#authentication.name == board.owner.username and member.id != board.owner.id}"
+                        th:data-user-id="${member.id}"
+                        title="Remove member"
+                >
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+            </div>
 
-          <div
-            th:if="${#authentication.name == board.owner.username}"
-            class="invite-form"
-          >
-            <form id="invite-member-form">
-              <input
-                type="text"
-                id="invite-email"
-                placeholder="Enter email..."
-                required
-              />
-              <button type="submit">Invite</button>
-            </form>
-          </div>
+            <div
+                    th:if="${#authentication.name == board.owner.username}"
+                    class="invite-form"
+            >
+                <form id="invite-member-form">
+                    <input
+                            type="text"
+                            id="invite-email"
+                            placeholder="Enter email..."
+                            required
+                    />
+                    <button type="submit">Invite</button>
+                </form>
+            </div>
         </div>
-      </div>
     </div>
+</div>
 
-    <div class="board-container" id="board-container">
-      <div
-        class="card-list"
-        th:each="list : ${board.cardLists}"
-        th:attr="data-list-id=${list.id}"
-      >
+<div class="board-container" id="board-container">
+    <div
+            class="card-list"
+            th:each="list : ${board.cardLists}"
+            th:attr="data-list-id=${list.id}"
+    >
         <div class="card-list-header">
-          <div
-            class="list-title"
-            contenteditable="true"
-            th:text="${list.title}"
-          >
-            List Title
-          </div>
-          <button class="list-delete-btn">×</button>
+            <div
+                    class="list-title"
+                    contenteditable="true"
+                    th:text="${list.title}"
+            >
+                List Title
+            </div>
+            <button class="list-delete-btn">×</button>
         </div>
         <div class="card-container">
-          <div
-            class="card"
-            th:each="card : ${list.cards}"
-            th:attr="data-card-id=${card.id}"
-          >
-            <div class="card-labels"></div>
-            <span th:text="${card.title}">Card Title</span>
-            <button class="card-delete-btn">×</button>
-            <div class="card-assignees">
-              <div
-                th:each="assignee : ${card.assignees}"
-                class="member-avatar"
-                th:title="${assignee.username}"
-              >
+            <div
+                    class="card"
+                    th:each="card : ${list.cards}"
+                    th:attr="data-card-id=${card.id}"
+            >
+                <div class="card-labels"></div>
+                <span th:text="${card.title}">Card Title</span>
+                <button class="card-delete-btn">×</button>
+                <div class="card-assignees">
+                    <div
+                            th:each="assignee : ${card.assignees}"
+                            class="member-avatar"
+                            th:title="${assignee.username}"
+                    >
                 <span
-                  th:text="${#strings.substring(assignee.username, 0, 1).toUpperCase()}"
+                        th:text="${#strings.substring(assignee.username, 0, 1).toUpperCase()}"
                 ></span>
-              </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
         <div class="add-card-form-container">
-          <form class="add-card-form">
-            <input
-              type="text"
-              class="new-card-title"
-              placeholder="Enter a title for this card..."
-              required
-            />
-            <button type="submit">Add Card</button>
-          </form>
+            <form class="add-card-form">
+                <input
+                        type="text"
+                        class="new-card-title"
+                        placeholder="Enter a title for this card..."
+                        required
+                />
+                <button type="submit">Add Card</button>
+            </form>
         </div>
-      </div>
-
-      <div class="add-list-wrapper">
-        <form id="add-list-form" class="add-list-form">
-          <input
-            type="text"
-            id="new-list-title"
-            placeholder="Enter list title..."
-            required
-          />
-          <button type="submit">Add List</button>
-        </form>
-      </div>
     </div>
 
-    <div id="card-modal" class="modal-overlay" style="display: none">
-      <div class="modal-content">
+    <div class="add-list-wrapper">
+        <form id="add-list-form" class="add-list-form">
+            <input
+                    type="text"
+                    id="new-list-title"
+                    placeholder="Enter list title..."
+                    required
+            />
+            <button type="submit">Add List</button>
+        </form>
+    </div>
+</div>
+
+<div id="card-modal" class="modal-overlay" style="display: none">
+    <div class="modal-content">
         <button class="close-modal">×</button>
         <div id="modal-card-content">
-          <div
-            id="modal-card-title"
-            contenteditable="true"
-            style="
+            <div
+                    id="modal-card-title"
+                    contenteditable="true"
+                    style="
               font-size: 24px;
               font-weight: bold;
               margin-bottom: 15px;
@@ -154,13 +154,13 @@
               padding: 5px;
               border-radius: 3px;
             "
-          ></div>
+            ></div>
 
-          <p style="margin-top: 20px; font-weight: bold">Description</p>
-          <textarea
-            id="modal-card-description"
-            rows="4"
-            style="
+            <p style="margin-top: 20px; font-weight: bold">Description</p>
+            <textarea
+                    id="modal-card-description"
+                    rows="4"
+                    style="
               width: 100%;
               box-sizing: border-box;
               border: 1px solid #ccc;
@@ -168,49 +168,49 @@
               padding: 8px;
               font-family: inherit;
             "
-          ></textarea>
-          <div class="labels-section">
-            <p><strong><i class="fas fa-tags"></i> Labels</strong></p>
-            <ul id="modal-label-list" class="label-list">
-              <!-- Các nhãn sẽ được JS chèn vào đây -->
-            </ul>
-          </div>
-          <div class="assignees-section">
-            <p><strong>Members</strong></p>
-            <ul id="modal-member-list" class="member-list"></ul>
-          </div>
-          <div class="attachments-section">
-            <p>
-              <strong><i class="fas fa-paperclip"></i> Attachments</strong>
-            </p>
-            <ul id="attachment-list" class="attachment-list">
-              <!-- Các file đính kèm sẽ được JS chèn vào đây -->
-            </ul>
-            <div class="attachment-upload-form">
-              <input type="file" id="file-upload-input" style="display: none" />
-              <button
-                type="button"
-                id="select-file-button"
-                class="btn-secondary"
-              >
-                <i class="fas fa-file-upload"></i> Choose File
-              </button>
-              <!-- Nút upload ban đầu sẽ bị ẩn -->
-              <button
-                type="button"
-                id="upload-file-button"
-                class="btn-primary"
-                style="display: none"
-              >
-                <i class="fas fa-check"></i> Upload
-              </button>
-              <span id="file-name-display"></span>
+            ></textarea>
+            <div class="labels-section">
+                <p><strong><i class="fas fa-tags"></i> Labels</strong></p>
+                <ul id="modal-label-list" class="label-list">
+
+                </ul>
             </div>
-          </div>
-          <button id="save-card-details">Save</button>
-          <button
-            id="delete-card-from-modal"
-            style="
+            <div class="assignees-section">
+                <p><strong>Members</strong></p>
+                <ul id="modal-member-list" class="member-list"></ul>
+            </div>
+            <div class="attachments-section">
+                <p>
+                    <strong><i class="fas fa-paperclip"></i> Attachments</strong>
+                </p>
+                <ul id="attachment-list" class="attachment-list">
+
+                </ul>
+                <div class="attachment-upload-form">
+                    <input type="file" id="file-upload-input" style="display: none"/>
+                    <button
+                            type="button"
+                            id="select-file-button"
+                            class="btn-secondary"
+                    >
+                        <i class="fas fa-file-upload"></i> Choose File
+                    </button>
+
+                    <button
+                            type="button"
+                            id="upload-file-button"
+                            class="btn-primary"
+                            style="display: none"
+                    >
+                        <i class="fas fa-check"></i> Upload
+                    </button>
+                    <span id="file-name-display"></span>
+                </div>
+            </div>
+            <button id="save-card-details">Save</button>
+            <button
+                    id="delete-card-from-modal"
+                    style="
               background-color: #cf513d;
               color: white;
               border: none;
@@ -218,13 +218,13 @@
               border-radius: 3px;
               cursor: pointer;
             "
-          >
-            Delete
-          </button>
+            >
+                Delete
+            </button>
         </div>
-      </div>
     </div>
+</div>
 
-    <script th:src="@{/static/js/board.js}"></script>
-  </body>
+<script th:src="@{/static/js/board.js}"></script>
+</body>
 </html>

@@ -1,123 +1,131 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Login - Kanflow</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
     />
     <style>
-      body {
-        min-height: 100vh;
-        background: linear-gradient(135deg, #6a5acd 0%, #4169e1 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .kanflow-logo {
-        font-size: 2.2rem;
-        font-weight: 900;
-        letter-spacing: 2px;
-        color: #6a5acd;
-        margin-bottom: 8px;
-        text-shadow: 0 2px 12px rgba(80, 80, 120, 0.1);
-      }
-      .login-form-container {
-        max-width: 410px;
-        border-radius: 22px;
-        box-shadow: 0 8px 32px rgba(80, 80, 120, 0.18);
-        background: #fff;
-        padding: 38px 32px 32px 32px;
-        margin: 0 auto;
-      }
-      .form-floating > label {
-        color: #6a5acd;
-        font-weight: 500;
-      }
-      .btn-kanflow {
-        background: linear-gradient(90deg, #6a5acd 60%, #4169e1 100%);
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        font-weight: 700;
-        font-size: 1.1rem;
-        padding: 12px 0;
-        box-shadow: 0 2px 8px rgba(106, 90, 205, 0.1);
-        transition: background 0.2s;
-      }
-      .btn-kanflow:hover {
-        background: #4e54c8;
-      }
-      .card-body {
-        padding: 0;
-      }
-      .text-muted a {
-        color: #4169e1;
-        font-weight: 600;
-        text-decoration: none;
-      }
-      .text-muted a:hover {
-        text-decoration: underline;
-      }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6a5acd 0%, #4169e1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .kanflow-logo {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #6a5acd;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 12px rgba(80, 80, 120, 0.1);
+        }
+
+        .login-form-container {
+            max-width: 410px;
+            border-radius: 22px;
+            box-shadow: 0 8px 32px rgba(80, 80, 120, 0.18);
+            background: #fff;
+            padding: 38px 32px 32px 32px;
+            margin: 0 auto;
+        }
+
+        .form-floating > label {
+            color: #6a5acd;
+            font-weight: 500;
+        }
+
+        .btn-kanflow {
+            background: linear-gradient(90deg, #6a5acd 60%, #4169e1 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 12px 0;
+            box-shadow: 0 2px 8px rgba(106, 90, 205, 0.1);
+            transition: background 0.2s;
+        }
+
+        .btn-kanflow:hover {
+            background: #4e54c8;
+        }
+
+        .card-body {
+            padding: 0;
+        }
+
+        .text-muted a {
+            color: #4169e1;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .text-muted a:hover {
+            text-decoration: underline;
+        }
     </style>
-  </head>
-  <body>
-    <div class="login-form-container">
-      <div class="card-body">
+</head>
+<body>
+<div class="login-form-container">
+    <div class="card-body">
         <div class="text-center mb-4">
-          <div class="kanflow-logo">Kanflow</div>
-          <p class="text-muted mb-3">Đăng nhập để quản lý công việc của bạn</p>
+            <div class="kanflow-logo">Kanflow</div>
+            <p class="text-muted mb-3">Đăng nhập để quản lý công việc của bạn</p>
         </div>
         <div th:if="${param.error}" class="alert alert-danger" role="alert">
-          Sai tên đăng nhập hoặc mật khẩu. Vui lòng thử lại.
+            Sai tên đăng nhập hoặc mật khẩu. Vui lòng thử lại.
         </div>
         <div th:if="${param.logout}" class="alert alert-success" role="alert">
-          Bạn đã đăng xuất thành công.
+            Bạn đã đăng xuất thành công.
         </div>
         <div
-          th:if="${param.register_success}"
-          class="alert alert-success"
-          role="alert"
+                th:if="${param.register_success}"
+                class="alert alert-success"
+                role="alert"
         >
-          Đăng ký thành công! Vui lòng đăng nhập.
+            Đăng ký thành công! Vui lòng đăng nhập.
         </div>
         <form th:action="@{/doLogin}" method="post">
-          <div class="form-floating mb-3">
-            <input
-              type="text"
-              class="form-control"
-              id="username"
-              name="username"
-              placeholder="Tên đăng nhập"
-              required
-              autofocus
-            />
-            <label for="username">Tên đăng nhập</label>
-          </div>
-          <div class="form-floating mb-4">
-            <input
-              type="password"
-              class="form-control"
-              id="password"
-              name="password"
-              placeholder="Mật khẩu"
-              required
-            />
-            <label for="password">Mật khẩu</label>
-          </div>
-          <button class="w-100 btn btn-kanflow mb-2" type="submit">
-            Đăng nhập
-          </button>
+            <div class="form-floating mb-3">
+                <input
+                        type="text"
+                        class="form-control"
+                        id="username"
+                        name="username"
+                        placeholder="Tên đăng nhập"
+                        required
+                        autofocus
+                />
+                <label for="username">Tên đăng nhập</label>
+            </div>
+            <div class="form-floating mb-4">
+                <input
+                        type="password"
+                        class="form-control"
+                        id="password"
+                        name="password"
+                        placeholder="Mật khẩu"
+                        required
+                />
+                <label for="password">Mật khẩu</label>
+            </div>
+            <button class="w-100 btn btn-kanflow mb-2" type="submit">
+                Đăng nhập
+            </button>
         </form>
         <div class="text-center mt-4">
-          <p class="text-muted">
-            Chưa có tài khoản? <a th:href="@{/register}">Đăng ký ngay</a>
-          </p>
+            <p class="text-muted">
+                Chưa có tài khoản? <a th:href="@{/register}">Đăng ký ngay</a>
+            </p>
         </div>
-      </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

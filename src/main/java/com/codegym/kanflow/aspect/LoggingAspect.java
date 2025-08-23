@@ -11,11 +11,6 @@ import java.util.Arrays;
 @Aspect
 @Component
 public class LoggingAspect {
-
-    /**
-     * Pointcut này sẽ cố gắng bắt các phương thức trong package "service.impl"
-     * (Giả định rằng bạn có cấu trúc thư mục service/impl)
-     */
     @AfterReturning(pointcut = "execution(* com.codegym.kanflow.service.impl.*.*(..))", returning = "result")
     public void logAfterReturning(JoinPoint joinPoint, Object result) {
         String className = joinPoint.getTarget().getClass().getSimpleName();

@@ -13,12 +13,10 @@ public class Board {
 
     private String title;
 
-    // Quan hệ Nhiều-1: Nhiều Board có thể thuộc về một User (chủ sở hữu).
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id") // Tạo cột khóa ngoại 'owner_id' trong bảng 'boards'.
+    @JoinColumn(name = "owner_id")
     private User owner;
 
-    // Quan hệ 1-Nhiều: Một Board có thể chứa nhiều CardList.
     @OneToMany(mappedBy = "board", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC")
     private List<CardList> cardLists;
@@ -31,7 +29,6 @@ public class Board {
     )
     private List<User> members;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

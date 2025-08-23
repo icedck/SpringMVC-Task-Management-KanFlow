@@ -15,8 +15,6 @@ public interface ICardService {
 
     void deleteById(Long id);
 
-    void updatePositions(List<Long> cardIds);
-
     void move(Card cardToMove, CardList targetList, int newPosition);
 
     void assignMember(Long cardId, Long userId);
