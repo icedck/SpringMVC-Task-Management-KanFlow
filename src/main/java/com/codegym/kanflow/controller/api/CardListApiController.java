@@ -10,7 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal; // Thêm import
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.List;
 
 @RestController
@@ -24,8 +25,11 @@ public class CardListApiController {
     private IBoardService boardService;
 
     @PostMapping
-    public ResponseEntity<CardListDto> createList(@RequestBody CardListDto cardListDto, @RequestParam Long boardId, Principal principal) {
-        if (!boardService.hasAccess(boardId, principal.getName())) {
+    public ResponseEntity<CardListDto> createList(@RequestBody CardListDto cardListDto, @RequestParam Long boardId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
+        if (!boardService.hasAccess(boardId, username)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -44,13 +48,16 @@ public class CardListApiController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CardListDto> updateListTitle(@PathVariable Long id, @RequestBody CardListDto cardListDto, Principal principal) {
+    public ResponseEntity<CardListDto> updateListTitle(@PathVariable Long id, @RequestBody CardListDto cardListDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         CardList listToUpdate = cardListService.findByIdWithBoard(id);
         if (listToUpdate == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        if (!boardService.hasAccess(listToUpdate.getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(listToUpdate.getBoard().getId(), username)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -61,13 +68,16 @@ public class CardListApiController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteList(@PathVariable Long id, Principal principal) {
+    public ResponseEntity<Void> deleteList(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         CardList listToDelete = cardListService.findByIdWithBoard(id);
         if (listToDelete == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        if (!boardService.hasAccess(listToDelete.getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(listToDelete.getBoard().getId(), username)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -76,11 +86,14 @@ public class CardListApiController {
     }
 
     @PutMapping("/updatePositions")
-    public ResponseEntity<Void> updateListPositions(@RequestBody List<Long> listIds, Principal principal) {
+    public ResponseEntity<Void> updateListPositions(@RequestBody List<Long> listIds) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         if (listIds != null && !listIds.isEmpty()) {
             CardList firstList = cardListService.findByIdWithBoard(listIds.get(0));
             if (firstList != null) {
-                if (!boardService.hasAccess(firstList.getBoard().getId(), principal.getName())) {
+                if (!boardService.hasAccess(firstList.getBoard().getId(), username)) {
                     return new ResponseEntity<>(HttpStatus.FORBIDDEN);
                 }
             } else {

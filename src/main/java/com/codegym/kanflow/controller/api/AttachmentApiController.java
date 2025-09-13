@@ -12,7 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.security.Principal;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
 @RequestMapping("/api/attachments")
@@ -27,12 +28,14 @@ public class AttachmentApiController {
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file,
-                                        @RequestParam("cardId") Long cardId,
-                                        Principal principal) {
+                                        @RequestParam("cardId") Long cardId) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
 
         Card card = cardService.findByIdWithDetails(cardId);
         if (card == null) return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
-        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), username)) {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
 
@@ -49,7 +52,7 @@ public class AttachmentApiController {
     }
 
     @DeleteMapping("/{attachmentId}")
-    public ResponseEntity<Void> deleteFile(@PathVariable Long attachmentId, Principal principal) {
+    public ResponseEntity<Void> deleteFile(@PathVariable Long attachmentId) {
         attachmentService.deleteFile(attachmentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

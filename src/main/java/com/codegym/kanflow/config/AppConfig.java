@@ -6,10 +6,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.stereotype.Controller;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -19,7 +17,7 @@ import java.util.Properties;
 @EnableTransactionManagement
 @EnableJpaRepositories("com.codegym.kanflow.repository")
 @ComponentScan(basePackages = "com.codegym.kanflow")
-@PropertySource("classpath:upload_file.properties")
+@PropertySource({"classpath:upload_file.properties", "classpath:jwt.properties"})
 @EnableAspectJAutoProxy
 public class AppConfig {
 

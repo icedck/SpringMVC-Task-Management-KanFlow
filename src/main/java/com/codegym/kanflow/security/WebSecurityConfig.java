@@ -7,10 +7,15 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.http.HttpStatus;
 
 @Configuration
 @EnableWebSecurity // Kích hoạt Spring Security
@@ -19,6 +24,9 @@ public class WebSecurityConfig { // Lưu ý: Không cần "extends WebSecurityCo
     // Inject UserDetailsService của chúng ta
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -50,39 +58,30 @@ public class WebSecurityConfig { // Lưu ý: Không cần "extends WebSecurityCo
                 .authorizeRequests(authorizeRequests ->
                         authorizeRequests
                                 .antMatchers("/", "/login", "/register", "/static/**", "/error/**").permitAll()
-
-                                // ĐỊNH NGHĨA QUYỀN MỚI
-                                // Ví dụ: tạo một trang quản lý user chỉ cho ADMIN
+                                .antMatchers("/api/login", "/api/logout").permitAll()
                                 .antMatchers("/admin/**").hasRole("ADMIN")
-
-                                // Các URL của board yêu cầu vai trò USER hoặc ADMIN
                                 .antMatchers("/boards/**").hasAnyRole("USER", "ADMIN")
                                 .antMatchers("/api/**").hasAnyRole("USER", "ADMIN")
-
                                 .anyRequest().authenticated()
                 )
-                .formLogin(formLogin ->
-                        formLogin
-                                // URL của trang đăng nhập tùy chỉnh mà chúng ta sẽ tạo
-                                .loginPage("/login")
-                                // URL mà form đăng nhập sẽ gửi đến. Spring Security sẽ tự xử lý request này.
-                                .loginProcessingUrl("/doLogin")
-                                // URL sẽ chuyển đến sau khi đăng nhập thành công.
-                                // 'true' ở đây để luôn luôn chuyển hướng đến trang này.
-                                .defaultSuccessUrl("/boards", true)
-                                .permitAll() // Cho phép tất cả mọi người truy cập vào trang đăng nhập
+                .sessionManagement(sessionManagement ->
+                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .logout(logout ->
-                        logout
-                                // URL để thực hiện đăng xuất
-                                .logoutUrl("/logout")
-                                // URL sẽ chuyển đến sau khi đăng xuất thành công
-                                .logoutSuccessUrl("/login?logout")
-                                .permitAll()
-                ).exceptionHandling(exceptionHandling ->
-                        exceptionHandling.accessDeniedPage("/error/403")
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling
+                                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                                    if (request.getRequestURI().startsWith("/api/")) {
+                                        response.setStatus(403);
+                                        response.setContentType("application/json");
+                                        response.getWriter().write("{\"error\":\"Access Denied\"}");
+                                    } else {
+                                        response.sendRedirect("/error/403");
+                                    }
+                                })
                 )
-                .csrf(csrf -> csrf.disable()); // Tạm thời tắt CSRF để dễ làm việc
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .csrf(csrf -> csrf.disable());
 
         return http.build();
     }

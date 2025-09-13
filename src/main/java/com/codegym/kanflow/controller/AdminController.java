@@ -6,6 +6,8 @@ import com.codegym.kanflow.service.IRoleService;
 import com.codegym.kanflow.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
-import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +43,13 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ModelAndView listUsers(Principal principal) {
+    public ModelAndView listUsers() {
         ModelAndView modelAndView = new ModelAndView("admin/user-list");
         List<User> users = userService.findAll();
-        String currentUsername = principal.getName();
+        
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
 
         Map<Long, Boolean> userCanEdit = new HashMap<>();
 
@@ -62,9 +66,13 @@ public class AdminController {
     }
 
     @GetMapping("/users/edit/{id}")
-    public ModelAndView showUserEditForm(@PathVariable Long id, Principal principal) {
+    public ModelAndView showUserEditForm(@PathVariable Long id) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        
         User userToEdit = userService.findByIdWithRoles(id);
-        User currentUser = userService.findByUsername(principal.getName());
+        User currentUser = userService.findByUsername(currentUsername);
 
         if (isUserAdmin(userToEdit)) {
             if (!userToEdit.getId().equals(currentUser.getId())) {
@@ -83,10 +91,13 @@ public class AdminController {
     @PostMapping("/users/edit")
     public String updateUser(@Valid @ModelAttribute("user") User userFromForm,
                              BindingResult bindingResult,
-                             Model model, Principal principal) {
+                             Model model) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
 
         User userToEdit = userService.findByIdWithRoles(userFromForm.getId());
-        User currentUser = userService.findByUsername(principal.getName());
+        User currentUser = userService.findByUsername(currentUsername);
 
         if (isUserAdmin(userToEdit) && !userToEdit.getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("Admins cannot edit other admins.");
@@ -111,14 +122,17 @@ public class AdminController {
     }
 
     @PostMapping("/users/delete/{id}")
-    public String deleteUser(@PathVariable Long id, Principal principal) {
+    public String deleteUser(@PathVariable Long id) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        
         User userToDelete = userService.findByIdWithRoles(id);
-        User currentUser = userService.findByUsername(principal.getName());
+        User currentUser = userService.findByUsername(currentUsername);
 
         if (userToDelete.getId().equals(currentUser.getId())) {
             return "redirect:/admin/users?error=self_delete";
         }
-
 
         if (isUserAdmin(userToDelete)) {
             throw new AccessDeniedException("Admins cannot delete other admins.");

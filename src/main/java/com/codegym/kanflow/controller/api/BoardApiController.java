@@ -10,7 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,10 +28,11 @@ public class BoardApiController {
     @PostMapping("/{boardId}/members")
     public ResponseEntity<String> addMemberToBoard(
             @PathVariable Long boardId,
-            @RequestParam String email,
-            Principal principal) {
+            @RequestParam String email) {
 
-        String resultMessage = boardService.inviteMember(boardId, email, principal.getName());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        String resultMessage = boardService.inviteMember(boardId, email, username);
 
         if (resultMessage.contains("successfully") || resultMessage.contains("added")) {
             return new ResponseEntity<>(resultMessage, HttpStatus.OK);
@@ -44,8 +46,11 @@ public class BoardApiController {
     }
 
     @GetMapping("/{boardId}/members")
-    public ResponseEntity<List<UserDto>> getBoardMembers(@PathVariable Long boardId, Principal principal) {
-        if (!boardService.hasAccess(boardId, principal.getName())) {
+    public ResponseEntity<List<UserDto>> getBoardMembers(@PathVariable Long boardId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
+        if (!boardService.hasAccess(boardId, username)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -66,10 +71,11 @@ public class BoardApiController {
     @DeleteMapping("/{boardId}/members/{userId}")
     public ResponseEntity<String> removeMemberFromBoard(
             @PathVariable Long boardId,
-            @PathVariable Long userId,
-            Principal principal) {
+            @PathVariable Long userId) {
 
-        String resultMessage = boardService.removeMember(boardId, userId, principal.getName());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        String resultMessage = boardService.removeMember(boardId, userId, username);
 
         if (resultMessage.contains("removed")) {
             return new ResponseEntity<>(resultMessage, HttpStatus.OK);

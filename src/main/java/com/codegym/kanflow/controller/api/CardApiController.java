@@ -15,7 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,12 +34,16 @@ public class CardApiController {
     private IBoardService boardService;
 
     @PostMapping
-    public ResponseEntity<?> createCard(@RequestBody CardDto cardDto, @RequestParam Long listId, Principal principal) {
+    public ResponseEntity<?> createCard(@RequestBody CardDto cardDto, @RequestParam Long listId) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         CardList cardList = cardListService.findByIdWithBoard(listId);
         if (cardList == null) {
             return new ResponseEntity<>("List not found", HttpStatus.NOT_FOUND);
         }
-        if (!boardService.hasAccess(cardList.getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(cardList.getBoard().getId(), username)) {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
         Card newCard = new Card();
@@ -50,12 +55,16 @@ public class CardApiController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCardDetails(@PathVariable Long id, Principal principal) {
+    public ResponseEntity<?> getCardDetails(@PathVariable Long id) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         Card card = cardService.findByIdWithDetails(id);
         if (card == null) {
             return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
         }
-        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), username)) {
             throw new AccessDeniedException("You do not have permission to view this card.");
         }
 
@@ -78,12 +87,16 @@ public class CardApiController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCard(@PathVariable Long id, @RequestBody CardDto cardDto, Principal principal) {
+    public ResponseEntity<?> updateCard(@PathVariable Long id, @RequestBody CardDto cardDto) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         Card card = cardService.findByIdWithDetails(id);
         if (card == null) {
             return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
         }
-        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), username)) {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
         card.setTitle(cardDto.getTitle());
@@ -109,12 +122,16 @@ public class CardApiController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCard(@PathVariable Long id, Principal principal) {
+    public ResponseEntity<Void> deleteCard(@PathVariable Long id) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         Card card = cardService.findByIdWithDetails(id);
         if (card == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), username)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         cardService.deleteById(id);
@@ -122,19 +139,23 @@ public class CardApiController {
     }
 
     @PutMapping("/{cardId}/move")
-    public ResponseEntity<Void> moveCard(@PathVariable Long cardId, @RequestBody CardMoveDto cardMoveDto, Principal principal) {
+    public ResponseEntity<Void> moveCard(@PathVariable Long cardId, @RequestBody CardMoveDto cardMoveDto) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         Card card = cardService.findByIdWithDetails(cardId);
         if (card == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), username)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         CardList targetList = cardListService.findByIdWithBoard(cardMoveDto.getTargetListId());
         if (targetList == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        if (!boardService.hasAccess(targetList.getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(targetList.getBoard().getId(), username)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         try {
@@ -147,12 +168,16 @@ public class CardApiController {
     }
 
     @PostMapping("/{cardId}/assignees/{userId}")
-    public ResponseEntity<?> assignMember(@PathVariable Long cardId, @PathVariable Long userId, Principal principal) {
+    public ResponseEntity<?> assignMember(@PathVariable Long cardId, @PathVariable Long userId) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         Card card = cardService.findByIdWithDetails(cardId);
         if (card == null) {
             return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
         }
-        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), username)) {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
         cardService.assignMember(cardId, userId);
@@ -160,12 +185,16 @@ public class CardApiController {
     }
 
     @DeleteMapping("/{cardId}/assignees/{userId}")
-    public ResponseEntity<?> unassignMember(@PathVariable Long cardId, @PathVariable Long userId, Principal principal) {
+    public ResponseEntity<?> unassignMember(@PathVariable Long cardId, @PathVariable Long userId) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         Card card = cardService.findByIdWithDetails(cardId);
         if (card == null) {
             return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
         }
-        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), username)) {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
         cardService.unassignMember(cardId, userId);
@@ -173,12 +202,16 @@ public class CardApiController {
     }
 
     @GetMapping("/{cardId}/attachments")
-    public ResponseEntity<?> getCardAttachments(@PathVariable Long cardId, Principal principal) {
+    public ResponseEntity<?> getCardAttachments(@PathVariable Long cardId) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         Card card = cardService.findByIdWithDetails(cardId);
         if (card == null) {
             return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
         }
-        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), username)) {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
 
@@ -195,12 +228,16 @@ public class CardApiController {
     }
 
     @PostMapping("/{cardId}/labels/{labelId}")
-    public ResponseEntity<?> assignLabel(@PathVariable Long cardId, @PathVariable Long labelId, Principal principal) {
+    public ResponseEntity<?> assignLabel(@PathVariable Long cardId, @PathVariable Long labelId) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         Card card = cardService.findByIdWithDetails(cardId);
         if (card == null) {
             return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
         }
-        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), username)) {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
         cardService.assignLabel(cardId, labelId);
@@ -208,12 +245,16 @@ public class CardApiController {
     }
 
     @DeleteMapping("/{cardId}/labels/{labelId}")
-    public ResponseEntity<?> unassignLabel(@PathVariable Long cardId, @PathVariable Long labelId, Principal principal) {
+    public ResponseEntity<?> unassignLabel(@PathVariable Long cardId, @PathVariable Long labelId) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         Card card = cardService.findByIdWithDetails(cardId);
         if (card == null) {
             return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
         }
-        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), principal.getName())) {
+        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), username)) {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
         cardService.unassignLabel(cardId, labelId);

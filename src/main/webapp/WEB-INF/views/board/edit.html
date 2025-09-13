@@ -87,5 +87,15 @@
         <a th:href="@{/boards}" class="cancel-link">Cancel</a>
     </form>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/static/js/auth.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Không cần kiểm tra authentication client-side
+        // Spring Security sẽ xử lý redirect tự động
+    });
+</script>
 </body>
 </html>

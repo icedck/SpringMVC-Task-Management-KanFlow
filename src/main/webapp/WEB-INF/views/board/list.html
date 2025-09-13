@@ -405,7 +405,7 @@
                     </div>
 
                     <div class="dropdown-divider"></div>
-                    <button type="submit" form="logoutForm">
+                    <button type="button" onclick="window.authManager.logout()">
                         <i class="fas fa-sign-out-alt"></i> Sign out
                     </button>
                 </div>
@@ -506,11 +506,14 @@
     </div>
 </div>
 
-<form id="logoutForm" th:action="@{/logout}" method="post" style="display: none;"></form>
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/static/js/auth.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Không cần kiểm tra authentication client-side
+        // Spring Security sẽ xử lý redirect tự động
+
         const cards = document.querySelectorAll(".board-card");
         cards.forEach((card, index) => {
             card.style.animationDelay = `${index * 0.1}s`;

@@ -6,11 +6,11 @@ import com.codegym.kanflow.service.IBoardService;
 import com.codegym.kanflow.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,10 +22,14 @@ public class BoardController {
     @Autowired private IUserService userService;
 
     @GetMapping
-    public ModelAndView showBoardList(Principal principal) {
+    public ModelAndView showBoardList() {
         ModelAndView modelAndView = new ModelAndView("board/list");
 
-        User currentUser = userService.findByUsername(principal.getName());
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
+        User currentUser = userService.findByUsername(username);
         Long currentUserId = currentUser.getId(); // Lấy ID ra một lần để so sánh
 
         modelAndView.addObject("currentUser", currentUser);
@@ -57,8 +61,10 @@ public class BoardController {
     }
 
     @PostMapping("/create")
-    public String createBoard(@ModelAttribute("board") Board board, Principal principal) {
-        String username = principal.getName();
+    public String createBoard(@ModelAttribute("board") Board board) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
         User currentUser = userService.findByUsername(username);
 
         board.setOwner(currentUser);
@@ -68,8 +74,12 @@ public class BoardController {
     }
 
     @GetMapping("/{id}")
-    public ModelAndView showBoardDetails(@PathVariable Long id, Principal principal) {
-        if (!boardService.hasAccess(id, principal.getName())) {
+    public ModelAndView showBoardDetails(@PathVariable Long id) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
+        if (!boardService.hasAccess(id, username)) {
             throw new AccessDeniedException("You do not have permission to view this board.");
         }
         Board board = boardService.findByIdWithDetails(id);
@@ -84,10 +94,14 @@ public class BoardController {
     }
 
     @GetMapping("/edit/{id}")
-    public ModelAndView showEditForm(@PathVariable Long id, Principal principal) {
+    public ModelAndView showEditForm(@PathVariable Long id) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         Board board = boardService.findByIdWithOwner(id);
 
-        if (board == null || !board.getOwner().getUsername().equals(principal.getName())) {
+        if (board == null || !board.getOwner().getUsername().equals(username)) {
             throw new AccessDeniedException("You do not have permission to edit this board.");
         }
 
@@ -97,10 +111,14 @@ public class BoardController {
     }
 
     @PostMapping("/edit")
-    public String updateBoard(@ModelAttribute("board") Board board, Principal principal) {
+    public String updateBoard(@ModelAttribute("board") Board board) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         Board existingBoard = boardService.findByIdWithOwner(board.getId());
 
-        if (existingBoard == null || !existingBoard.getOwner().getUsername().equals(principal.getName())) {
+        if (existingBoard == null || !existingBoard.getOwner().getUsername().equals(username)) {
             throw new AccessDeniedException("You do not have permission to edit this board.");
         }
 
@@ -110,10 +128,14 @@ public class BoardController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteBoard(@PathVariable Long id, Principal principal) {
+    public String deleteBoard(@PathVariable Long id) {
+        // Lấy thông tin user từ JWT authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
         Board board = boardService.findByIdWithOwner(id);
 
-        if (board == null || !board.getOwner().getUsername().equals(principal.getName())) {
+        if (board == null || !board.getOwner().getUsername().equals(username)) {
             throw new AccessDeniedException("You do not have permission to delete this board.");
         }
 
