@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
     @GetMapping("/")
     public String showHomePage() {
-        // Kiểm tra nếu user đã đăng nhập thì redirect về boards
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && 
             !(authentication instanceof AnonymousAuthenticationToken)) {

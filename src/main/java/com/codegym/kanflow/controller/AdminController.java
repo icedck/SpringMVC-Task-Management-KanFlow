@@ -47,7 +47,6 @@ public class AdminController {
         ModelAndView modelAndView = new ModelAndView("admin/user-list");
         List<User> users = userService.findAll();
         
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
 
@@ -67,7 +66,6 @@ public class AdminController {
 
     @GetMapping("/users/edit/{id}")
     public ModelAndView showUserEditForm(@PathVariable Long id) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
         
@@ -92,7 +90,6 @@ public class AdminController {
     public String updateUser(@Valid @ModelAttribute("user") User userFromForm,
                              BindingResult bindingResult,
                              Model model) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
 
@@ -123,7 +120,6 @@ public class AdminController {
 
     @PostMapping("/users/delete/{id}")
     public String deleteUser(@PathVariable Long id) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
         

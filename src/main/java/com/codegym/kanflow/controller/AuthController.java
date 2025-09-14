@@ -39,7 +39,6 @@ public class AuthController {
 
     @GetMapping("/login")
     public String showLoginPage() {
-        // Kiểm tra nếu user đã đăng nhập thì redirect về boards
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && 
             !(authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
@@ -88,12 +87,11 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = tokenProvider.generateToken(authentication);
 
-            // Tạo cookie để lưu JWT token
             Cookie jwtCookie = new Cookie("jwt", jwt);
             jwtCookie.setHttpOnly(true);
-            jwtCookie.setSecure(false); // Đặt true nếu sử dụng HTTPS
+            jwtCookie.setSecure(false);
             jwtCookie.setPath("/");
-            jwtCookie.setMaxAge((int) (jwtExpirationInMs / 1000)); // Chuyển từ ms sang seconds
+            jwtCookie.setMaxAge((int) (jwtExpirationInMs / 1000));
             response.addCookie(jwtCookie);
 
             return ResponseEntity.ok(new JwtAuthenticationResponse(jwt, jwtExpirationInMs));
@@ -105,7 +103,6 @@ public class AuthController {
     @PostMapping("/api/logout")
     @ResponseBody
     public ResponseEntity<?> logoutApi(HttpServletResponse response) {
-        // Xóa JWT cookie
         Cookie jwtCookie = new Cookie("jwt", null);
         jwtCookie.setHttpOnly(true);
         jwtCookie.setSecure(false);

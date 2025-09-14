@@ -25,12 +25,11 @@ public class BoardController {
     public ModelAndView showBoardList() {
         ModelAndView modelAndView = new ModelAndView("board/list");
 
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
         User currentUser = userService.findByUsername(username);
-        Long currentUserId = currentUser.getId(); // Lấy ID ra một lần để so sánh
+        Long currentUserId = currentUser.getId();
 
         modelAndView.addObject("currentUser", currentUser);
 
@@ -62,7 +61,6 @@ public class BoardController {
 
     @PostMapping("/create")
     public String createBoard(@ModelAttribute("board") Board board) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         User currentUser = userService.findByUsername(username);
@@ -75,7 +73,6 @@ public class BoardController {
 
     @GetMapping("/{id}")
     public ModelAndView showBoardDetails(@PathVariable Long id) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
@@ -95,7 +92,6 @@ public class BoardController {
 
     @GetMapping("/edit/{id}")
     public ModelAndView showEditForm(@PathVariable Long id) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
@@ -112,7 +108,6 @@ public class BoardController {
 
     @PostMapping("/edit")
     public String updateBoard(@ModelAttribute("board") Board board) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
@@ -129,7 +124,6 @@ public class BoardController {
 
     @PostMapping("/delete/{id}")
     public String deleteBoard(@PathVariable Long id) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         

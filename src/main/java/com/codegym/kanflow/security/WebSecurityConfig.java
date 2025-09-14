@@ -18,10 +18,9 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.http.HttpStatus;
 
 @Configuration
-@EnableWebSecurity // Kích hoạt Spring Security
-public class WebSecurityConfig { // Lưu ý: Không cần "extends WebSecurityConfigurerAdapter"
+@EnableWebSecurity
+public class WebSecurityConfig {
 
-    // Inject UserDetailsService của chúng ta
     @Autowired
     private UserDetailsService userDetailsService;
 
@@ -33,11 +32,6 @@ public class WebSecurityConfig { // Lưu ý: Không cần "extends WebSecurityCo
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Bean này cấu hình cách Spring Security xác thực người dùng.
-     * Nó nói rằng: "Hãy dùng UserDetailsService mà tôi cung cấp để tìm người dùng,
-     * và dùng PasswordEncoder này để kiểm tra mật khẩu".
-     */
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder =
@@ -48,10 +42,6 @@ public class WebSecurityConfig { // Lưu ý: Không cần "extends WebSecurityCo
         return authenticationManagerBuilder.build();
     }
 
-    /**
-     * Đây là nơi định nghĩa toàn bộ chuỗi bộ lọc bảo mật (security filter chain).
-     * Tất cả các request HTTP sẽ đi qua đây để được kiểm tra.
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http

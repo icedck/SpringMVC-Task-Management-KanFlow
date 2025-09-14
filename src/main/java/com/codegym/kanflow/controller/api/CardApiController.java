@@ -35,7 +35,6 @@ public class CardApiController {
 
     @PostMapping
     public ResponseEntity<?> createCard(@RequestBody CardDto cardDto, @RequestParam Long listId) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
@@ -56,7 +55,6 @@ public class CardApiController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getCardDetails(@PathVariable Long id) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
@@ -88,7 +86,6 @@ public class CardApiController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCard(@PathVariable Long id, @RequestBody CardDto cardDto) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
@@ -123,7 +120,6 @@ public class CardApiController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCard(@PathVariable Long id) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
@@ -140,7 +136,6 @@ public class CardApiController {
 
     @PutMapping("/{cardId}/move")
     public ResponseEntity<Void> moveCard(@PathVariable Long cardId, @RequestBody CardMoveDto cardMoveDto) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
@@ -169,7 +164,6 @@ public class CardApiController {
 
     @PostMapping("/{cardId}/assignees/{userId}")
     public ResponseEntity<?> assignMember(@PathVariable Long cardId, @PathVariable Long userId) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
@@ -186,7 +180,6 @@ public class CardApiController {
 
     @DeleteMapping("/{cardId}/assignees/{userId}")
     public ResponseEntity<?> unassignMember(@PathVariable Long cardId, @PathVariable Long userId) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
@@ -203,7 +196,6 @@ public class CardApiController {
 
     @GetMapping("/{cardId}/attachments")
     public ResponseEntity<?> getCardAttachments(@PathVariable Long cardId) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
@@ -229,7 +221,6 @@ public class CardApiController {
 
     @PostMapping("/{cardId}/labels/{labelId}")
     public ResponseEntity<?> assignLabel(@PathVariable Long cardId, @PathVariable Long labelId) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
@@ -246,7 +237,6 @@ public class CardApiController {
 
     @DeleteMapping("/{cardId}/labels/{labelId}")
     public ResponseEntity<?> unassignLabel(@PathVariable Long cardId, @PathVariable Long labelId) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         

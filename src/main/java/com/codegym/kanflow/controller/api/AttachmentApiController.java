@@ -1,5 +1,6 @@
 package com.codegym.kanflow.controller.api;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.codegym.kanflow.dto.AttachmentDto;
 import com.codegym.kanflow.model.Attachment;
 import com.codegym.kanflow.model.Card;
@@ -7,6 +8,7 @@ import com.codegym.kanflow.service.IAttachmentService;
 import com.codegym.kanflow.service.IBoardService;
 import com.codegym.kanflow.service.ICardService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +27,15 @@ public class AttachmentApiController {
     private ICardService cardService;
     @Autowired
     private IBoardService boardService;
+    @Autowired
+    private AmazonS3 s3client;
+    @Value("${aws.s3.bucketName}")
+    private String bucketName;
+
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file,
                                         @RequestParam("cardId") Long cardId) {
-        // Lấy thông tin user từ JWT authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
@@ -39,14 +45,14 @@ public class AttachmentApiController {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
 
-        // Lưu file
         Attachment attachment = attachmentService.storeFile(file, cardId);
 
-        // Tạo DTO để trả về cho frontend
         AttachmentDto dto = new AttachmentDto();
         dto.setId(attachment.getId());
         dto.setFileName(attachment.getFileName());
-        dto.setUrl("/attachments/" + attachment.getStoredFileName());
+
+        String fileUrl = s3client.getUrl(bucketName, attachment.getStoredFileName()).toString();
+        dto.setUrl(fileUrl);
 
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
