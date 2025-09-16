@@ -5,6 +5,8 @@
     <title th:text="${board.title} + ' | Kanflow'"></title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <link
             rel="stylesheet"
             href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
@@ -15,7 +17,7 @@
     />
     <link rel="stylesheet" th:href="@{/static/css/board.css}"/>
 </head>
-<body th:data-board-id="${board.id}">
+<body th:data-board-id="${board.id}" th:data-username="${#authentication.name}">
 <div class="board-header">
     <a
             href="/boards"
@@ -38,6 +40,7 @@
     <div class="header-main-content">
         <h1 th:text="${board.title}">Board Title</h1>
         <div class="board-members-section">
+            <!-- Members' avatars (including owner if they are in the members list) -->
             <div
                     th:each="member : ${board.members}"
                     class="member-avatar-wrapper"
@@ -97,7 +100,15 @@
                     th:each="card : ${list.cards}"
                     th:attr="data-card-id=${card.id}"
             >
-                <div class="card-labels"></div>
+                <div class="card-labels">
+                    <div
+                            th:each="label : ${card.labels}"
+                            class="card-label"
+                            th:style="'background-color: ' + ${label.color} + ';'"
+                            th:title="${label.name}"
+                            th:text="${label.name}"
+                    ></div>
+                </div>
                 <span th:text="${card.title}">Card Title</span>
                 <button class="card-delete-btn">×</button>
                 <div class="card-assignees">
@@ -225,6 +236,7 @@
     </div>
 </div>
 
+<script th:src="@{/static/js/websocket.js}"></script>
 <script th:src="@{/static/js/board.js}"></script>
 </body>
 </html>

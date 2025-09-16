@@ -9,6 +9,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import java.util.ArrayList;
@@ -72,6 +73,7 @@ public class BoardController {
     }
 
     @GetMapping("/{id}")
+    @Transactional(readOnly = true)
     public ModelAndView showBoardDetails(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
@@ -82,6 +84,43 @@ public class BoardController {
         Board board = boardService.findByIdWithDetails(id);
 
         if (board != null) {
+            // Force load all collections to prevent LazyInitializationException
+            // This ensures all data is loaded within the transaction
+            board.getCardLists().size();
+            board.getMembers().size();
+            board.getOwner().getUsername();
+            
+            for (com.codegym.kanflow.model.CardList list : board.getCardLists()) {
+                list.getCards().size();
+                
+                for (com.codegym.kanflow.model.Card card : list.getCards()) {
+                    // Force load all card collections
+                    card.getAssignees().size();
+                    card.getLabels().size();
+                    card.getAttachments().size();
+                    
+                    // Force load assignees details
+                    for (com.codegym.kanflow.model.User assignee : card.getAssignees()) {
+                        assignee.getUsername();
+                        assignee.getEmail();
+                    }
+                    
+                    // Force load labels details
+                    for (com.codegym.kanflow.model.Label label : card.getLabels()) {
+                        label.getName();
+                        label.getColor();
+                    }
+                    
+                    // Force load attachments details
+                    for (com.codegym.kanflow.model.Attachment attachment : card.getAttachments()) {
+                        attachment.getFileName();
+                        attachment.getStoredFileName();
+                        attachment.getFileType();
+                        attachment.getUploadDate();
+                    }
+                }
+            }
+            
             ModelAndView modelAndView = new ModelAndView("board/detail");
             modelAndView.addObject("board", board);
             return modelAndView;

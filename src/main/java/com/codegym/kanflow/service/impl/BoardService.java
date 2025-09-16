@@ -4,6 +4,8 @@ import com.codegym.kanflow.model.Board;
 import com.codegym.kanflow.model.Card;
 import com.codegym.kanflow.model.CardList;
 import com.codegym.kanflow.model.User;
+import com.codegym.kanflow.model.Label;
+import com.codegym.kanflow.model.Attachment;
 import com.codegym.kanflow.repository.BoardRepository;
 import com.codegym.kanflow.repository.UserRepository;
 import com.codegym.kanflow.service.IBoardService;
@@ -50,11 +52,39 @@ public class BoardService implements IBoardService {
         Board board = boardRepository.findByIdWithMembersAndOwner(id).orElse(null);
 
         if (board != null) {
+            // Force load all collections to prevent LazyInitializationException
             board.getCardLists().size();
+            board.getMembers().size();
+            board.getOwner().getUsername();
 
             for (CardList list : board.getCardLists()) {
+                list.getCards().size();
+                
                 for (Card card : list.getCards()) {
+                    // Force load all card collections
                     card.getAssignees().size();
+                    card.getLabels().size();
+                    card.getAttachments().size();
+                    
+                    // Force load assignees details
+                    for (User assignee : card.getAssignees()) {
+                        assignee.getUsername();
+                        assignee.getEmail();
+                    }
+                    
+                    // Force load labels details
+                    for (Label label : card.getLabels()) {
+                        label.getName();
+                        label.getColor();
+                    }
+                    
+                    // Force load attachments details
+                    for (Attachment attachment : card.getAttachments()) {
+                        attachment.getFileName();
+                        attachment.getStoredFileName();
+                        attachment.getFileType();
+                        attachment.getUploadDate();
+                    }
                 }
             }
         }

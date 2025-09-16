@@ -80,7 +80,12 @@
             // Xóa file trên S3
             s3client.deleteObject(bucketName, attachment.getStoredFileName());
 
-            // Xóa record trong database
-            attachmentRepository.delete(attachment);
-        }
+        // Xóa record trong database
+        attachmentRepository.delete(attachment);
     }
+
+    @Override
+    public Attachment findById(Long attachmentId) {
+        return attachmentRepository.findById(attachmentId).orElse(null);
+    }
+}

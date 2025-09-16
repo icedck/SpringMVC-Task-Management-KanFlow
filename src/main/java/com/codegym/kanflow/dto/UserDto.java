@@ -4,6 +4,7 @@ public class UserDto {
     private Long id;
     private String username;
     private String email;
+    private boolean assigned;
 
     public UserDto() {
     }
@@ -12,6 +13,14 @@ public class UserDto {
         this.id = id;
         this.username = username;
         this.email = email;
+        this.assigned = false;
+    }
+
+    public UserDto(Long id, String username, String email, boolean assigned) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.assigned = assigned;
     }
 
     public Long getId() { return id; }
@@ -20,4 +29,6 @@ public class UserDto {
     public void setUsername(String username) { this.username = username; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+    public boolean isAssigned() { return assigned; }
+    public void setAssigned(boolean assigned) { this.assigned = assigned; }
 }

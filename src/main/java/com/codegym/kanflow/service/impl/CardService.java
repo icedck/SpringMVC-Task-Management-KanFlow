@@ -119,6 +119,7 @@ public class CardService implements ICardService {
         Label label = labelRepository.findById(labelId).orElse(null);
         if (card != null && label != null) {
             card.getLabels().add(label);
+            cardRepository.save(card);
         }
     }
 
@@ -128,6 +129,7 @@ public class CardService implements ICardService {
         Card card = findByIdWithDetails(cardId);
         if (card != null) {
             card.getLabels().removeIf(label -> label.getId().equals(labelId));
+            cardRepository.save(card);
         }
     }
 }

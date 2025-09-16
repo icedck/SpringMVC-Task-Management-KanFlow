@@ -1,10 +1,13 @@
 package com.codegym.kanflow.controller.api;
 
 import com.codegym.kanflow.dto.UserDto;
+import com.codegym.kanflow.dto.MemberJoinMessage;
+import com.codegym.kanflow.dto.MemberLeaveMessage;
 import com.codegym.kanflow.model.Board;
 import com.codegym.kanflow.model.User;
 import com.codegym.kanflow.service.IBoardService;
 import com.codegym.kanflow.service.IUserService;
+import com.codegym.kanflow.service.IWebSocketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +27,9 @@ public class BoardApiController {
 
     @Autowired
     private IUserService userService;
+    
+    @Autowired
+    private IWebSocketService webSocketService;
 
     @PostMapping("/{boardId}/members")
     public ResponseEntity<String> addMemberToBoard(
@@ -35,6 +41,18 @@ public class BoardApiController {
         String resultMessage = boardService.inviteMember(boardId, email, username);
 
         if (resultMessage.contains("successfully") || resultMessage.contains("added")) {
+            // Send WebSocket notification
+            User newMember = userService.findByEmail(email);
+            if (newMember != null) {
+                MemberJoinMessage wsMessage = new MemberJoinMessage(
+                    boardId, 
+                    username, 
+                    newMember.getId(), 
+                    email, 
+                    username + " đã mời " + newMember.getUsername() + " tham gia board"
+                );
+                webSocketService.sendToBoard(boardId, wsMessage);
+            }
             return new ResponseEntity<>(resultMessage, HttpStatus.OK);
         } else if (resultMessage.contains("not found")) {
             return new ResponseEntity<>(resultMessage, HttpStatus.NOT_FOUND);
@@ -78,6 +96,17 @@ public class BoardApiController {
         String resultMessage = boardService.removeMember(boardId, userId, username);
 
         if (resultMessage.contains("removed")) {
+            // Send WebSocket notification
+            User removedUser = userService.findById(userId);
+            if (removedUser != null) {
+                MemberLeaveMessage wsMessage = new MemberLeaveMessage(
+                    boardId, 
+                    username, 
+                    userId, 
+                    username + " đã xóa " + removedUser.getUsername() + " khỏi board"
+                );
+                webSocketService.sendToBoard(boardId, wsMessage);
+            }
             return new ResponseEntity<>(resultMessage, HttpStatus.OK);
         } else if (resultMessage.contains("not found")) {
             return new ResponseEntity<>(resultMessage, HttpStatus.NOT_FOUND);

@@ -1,6 +1,7 @@
 package com.codegym.kanflow.controller.api;
 
 import com.codegym.kanflow.dto.*;
+import com.codegym.kanflow.model.Board;
 import com.codegym.kanflow.model.Card;
 import com.codegym.kanflow.model.CardList;
 import com.codegym.kanflow.model.Label;
@@ -9,10 +10,12 @@ import com.codegym.kanflow.model.Attachment;
 import com.codegym.kanflow.service.IBoardService;
 import com.codegym.kanflow.service.ICardListService;
 import com.codegym.kanflow.service.ICardService;
+import com.codegym.kanflow.service.IWebSocketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.security.core.Authentication;
@@ -32,6 +35,8 @@ public class CardApiController {
     private ICardListService cardListService;
     @Autowired
     private IBoardService boardService;
+    @Autowired
+    private IWebSocketService webSocketService;
 
     @PostMapping
     public ResponseEntity<?> createCard(@RequestBody CardDto cardDto, @RequestParam Long listId) {
@@ -50,7 +55,49 @@ public class CardApiController {
         newCard.setCardList(cardList);
         Card savedCard = cardService.save(newCard);
         CardDto responseDto = new CardDto(savedCard.getId(), savedCard.getTitle(), null, 0, new ArrayList<>(), new HashSet<>());
+        
+        // Send WebSocket notification
+        CardCreateMessage wsMessage = new CardCreateMessage(
+            cardList.getBoard().getId(), 
+            username, 
+            savedCard.getId(), 
+            savedCard.getTitle(), 
+            cardList.getId(), 
+            savedCard.getPosition()
+        );
+        webSocketService.sendToBoard(cardList.getBoard().getId(), wsMessage);
+        
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{cardId}/members")
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> getCardMembers(@PathVariable Long cardId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
+        Card card = cardService.findByIdWithDetails(cardId);
+        if (card == null) {
+            return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
+        }
+        
+        // Force load board and members to avoid lazy loading
+        Long boardId = card.getCardList().getBoard().getId();
+        if (!boardService.hasAccess(boardId, username)) {
+            return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
+        }
+        
+        // Get board with members using boardService to ensure proper loading
+        Board board = boardService.findByIdWithDetails(boardId);
+        List<User> boardMembers = board.getMembers();
+        List<UserDto> memberDtos = new ArrayList<>();
+        
+        for (User member : boardMembers) {
+            boolean assigned = card.getAssignees().contains(member);
+            memberDtos.add(new UserDto(member.getId(), member.getUsername(), member.getEmail(), assigned));
+        }
+        
+        return new ResponseEntity<>(memberDtos, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -93,20 +140,27 @@ public class CardApiController {
         if (card == null) {
             return new ResponseEntity<>("Card not found", HttpStatus.NOT_FOUND);
         }
-        if (!boardService.hasAccess(card.getCardList().getBoard().getId(), username)) {
+        
+        // Get board ID before updating to avoid lazy loading issues
+        Long boardId = card.getCardList().getBoard().getId();
+        if (!boardService.hasAccess(boardId, username)) {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
+        
         card.setTitle(cardDto.getTitle());
         card.setDescription(cardDto.getDescription());
-        Card updatedCard = cardService.save(card);
+        cardService.save(card);
 
+        // Get fresh card data to avoid lazy loading issues
+        Card freshCard = cardService.findByIdWithDetails(id);
+        
         List<UserDto> assigneeDtos = new ArrayList<>();
-        for (User user : updatedCard.getAssignees()) {
+        for (User user : freshCard.getAssignees()) {
             assigneeDtos.add(new UserDto(user.getId(), user.getUsername(), user.getEmail()));
         }
 
         Set<LabelDto> labelDtos = new HashSet<>();
-        for (Label label : updatedCard.getLabels()) {
+        for (Label label : freshCard.getLabels()) {
             LabelDto dto = new LabelDto();
             dto.setId(label.getId());
             dto.setName(label.getName());
@@ -114,7 +168,20 @@ public class CardApiController {
             labelDtos.add(dto);
         }
 
-        CardDto responseDto = new CardDto(updatedCard.getId(), updatedCard.getTitle(), updatedCard.getDescription(), updatedCard.getPosition(), assigneeDtos, labelDtos);
+        CardDto responseDto = new CardDto(freshCard.getId(), freshCard.getTitle(), freshCard.getDescription(), freshCard.getPosition(), assigneeDtos, labelDtos);
+        
+        // Send WebSocket notification
+        CardUpdateMessage wsMessage = new CardUpdateMessage(
+            boardId, 
+            username, 
+            freshCard.getId(), 
+            freshCard.getTitle(), 
+            freshCard.getDescription(), 
+            assigneeDtos, 
+            labelDtos
+        );
+        webSocketService.sendToBoard(boardId, wsMessage);
+        
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
@@ -130,6 +197,17 @@ public class CardApiController {
         if (!boardService.hasAccess(card.getCardList().getBoard().getId(), username)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+        
+        // Send WebSocket notification before deletion
+        CardDeleteMessage wsMessage = new CardDeleteMessage(
+            card.getCardList().getBoard().getId(), 
+            username, 
+            card.getId(), 
+            card.getTitle(), 
+            card.getCardList().getId()
+        );
+        webSocketService.sendToBoard(card.getCardList().getBoard().getId(), wsMessage);
+        
         cardService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -154,7 +232,23 @@ public class CardApiController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         try {
+            Long fromListId = card.getCardList().getId();
+            String cardTitle = card.getTitle();
+            
             cardService.move(card, targetList, cardMoveDto.getNewPosition());
+            
+            // Send WebSocket notification
+            CardMoveMessage wsMessage = new CardMoveMessage(
+                targetList.getBoard().getId(), 
+                username, 
+                card.getId(), 
+                fromListId, 
+                targetList.getId(), 
+                cardMoveDto.getNewPosition(), 
+                cardTitle
+            );
+            webSocketService.sendToBoard(targetList.getBoard().getId(), wsMessage);
+            
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
@@ -175,6 +269,37 @@ public class CardApiController {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
         cardService.assignMember(cardId, userId);
+        
+        // Get updated card with all details
+        Card updatedCard = cardService.findByIdWithDetails(cardId);
+        
+        // Prepare assignees and labels for WebSocket
+        List<UserDto> assigneeDtos = new ArrayList<>();
+        for (User user : updatedCard.getAssignees()) {
+            assigneeDtos.add(new UserDto(user.getId(), user.getUsername(), user.getEmail()));
+        }
+
+        Set<LabelDto> labelDtos = new HashSet<>();
+        for (Label label : updatedCard.getLabels()) {
+            LabelDto dto = new LabelDto();
+            dto.setId(label.getId());
+            dto.setName(label.getName());
+            dto.setColor(label.getColor());
+            labelDtos.add(dto);
+        }
+        
+        // Send WebSocket notification
+        CardUpdateMessage wsMessage = new CardUpdateMessage(
+            updatedCard.getCardList().getBoard().getId(), 
+            username, 
+            updatedCard.getId(), 
+            updatedCard.getTitle(), 
+            updatedCard.getDescription(), 
+            assigneeDtos, 
+            labelDtos
+        );
+        webSocketService.sendToBoard(updatedCard.getCardList().getBoard().getId(), wsMessage);
+        
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -191,6 +316,37 @@ public class CardApiController {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
         cardService.unassignMember(cardId, userId);
+        
+        // Get updated card with all details
+        Card updatedCard = cardService.findByIdWithDetails(cardId);
+        
+        // Prepare assignees and labels for WebSocket
+        List<UserDto> assigneeDtos = new ArrayList<>();
+        for (User user : updatedCard.getAssignees()) {
+            assigneeDtos.add(new UserDto(user.getId(), user.getUsername(), user.getEmail()));
+        }
+
+        Set<LabelDto> labelDtos = new HashSet<>();
+        for (Label label : updatedCard.getLabels()) {
+            LabelDto dto = new LabelDto();
+            dto.setId(label.getId());
+            dto.setName(label.getName());
+            dto.setColor(label.getColor());
+            labelDtos.add(dto);
+        }
+        
+        // Send WebSocket notification
+        CardUpdateMessage wsMessage = new CardUpdateMessage(
+            updatedCard.getCardList().getBoard().getId(), 
+            username, 
+            updatedCard.getId(), 
+            updatedCard.getTitle(), 
+            updatedCard.getDescription(), 
+            assigneeDtos, 
+            labelDtos
+        );
+        webSocketService.sendToBoard(updatedCard.getCardList().getBoard().getId(), wsMessage);
+        
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -232,6 +388,37 @@ public class CardApiController {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
         cardService.assignLabel(cardId, labelId);
+        
+        // Get updated card with all details
+        Card updatedCard = cardService.findByIdWithDetails(cardId);
+        
+        // Prepare assignees and labels for WebSocket
+        List<UserDto> assigneeDtos = new ArrayList<>();
+        for (User user : updatedCard.getAssignees()) {
+            assigneeDtos.add(new UserDto(user.getId(), user.getUsername(), user.getEmail()));
+        }
+
+        Set<LabelDto> labelDtos = new HashSet<>();
+        for (Label label : updatedCard.getLabels()) {
+            LabelDto dto = new LabelDto();
+            dto.setId(label.getId());
+            dto.setName(label.getName());
+            dto.setColor(label.getColor());
+            labelDtos.add(dto);
+        }
+        
+        // Send WebSocket notification
+        CardUpdateMessage wsMessage = new CardUpdateMessage(
+            updatedCard.getCardList().getBoard().getId(), 
+            username, 
+            updatedCard.getId(), 
+            updatedCard.getTitle(), 
+            updatedCard.getDescription(), 
+            assigneeDtos, 
+            labelDtos
+        );
+        webSocketService.sendToBoard(updatedCard.getCardList().getBoard().getId(), wsMessage);
+        
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -248,6 +435,37 @@ public class CardApiController {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
         cardService.unassignLabel(cardId, labelId);
+        
+        // Get updated card with all details
+        Card updatedCard = cardService.findByIdWithDetails(cardId);
+        
+        // Prepare assignees and labels for WebSocket
+        List<UserDto> assigneeDtos = new ArrayList<>();
+        for (User user : updatedCard.getAssignees()) {
+            assigneeDtos.add(new UserDto(user.getId(), user.getUsername(), user.getEmail()));
+        }
+
+        Set<LabelDto> labelDtos = new HashSet<>();
+        for (Label label : updatedCard.getLabels()) {
+            LabelDto dto = new LabelDto();
+            dto.setId(label.getId());
+            dto.setName(label.getName());
+            dto.setColor(label.getColor());
+            labelDtos.add(dto);
+        }
+        
+        // Send WebSocket notification
+        CardUpdateMessage wsMessage = new CardUpdateMessage(
+            updatedCard.getCardList().getBoard().getId(), 
+            username, 
+            updatedCard.getId(), 
+            updatedCard.getTitle(), 
+            updatedCard.getDescription(), 
+            assigneeDtos, 
+            labelDtos
+        );
+        webSocketService.sendToBoard(updatedCard.getCardList().getBoard().getId(), wsMessage);
+        
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
